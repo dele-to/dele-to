@@ -1,0 +1,20 @@
+# CODEOWNERS
+# Lines are pattern followed by one or more owners.
+# Learn more: https://docs.github.com/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+
+# Default owners for everything in the repo
+*       @arddluma
+
+# App and components
+/app/    @arddluma
+/components/ @arddluma
+
+# Libraries and hooks
+/lib/    @arddluma
+/hooks/  @arddluma
+
+# Config
+/package.json @arddluma
+/tailwind.config.ts @arddluma
+/next.config.mjs @arddluma
+/tsconfig.json @arddluma

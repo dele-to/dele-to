@@ -1,0 +1,49 @@
+name: "💡 Feature request"
+description: Suggest an idea to improve DELE.TO
+labels: [enhancement]
+title: "feat: <short description>"
+assignees: []
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for proposing an enhancement!
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem to solve
+      description: What problem does this feature address? What is the user need?
+      placeholder: Describe the pain point or opportunity...
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+      description: Describe your proposed change. Include UI/UX ideas if relevant.
+      placeholder: Explain the approach or design...
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      placeholder: Any alternative solutions or features you've considered?
+    validations:
+      required: false
+  - type: checkboxes
+    id: scope
+    attributes:
+      label: Scope
+      options:
+        - label: Frontend (UI/UX)
+        - label: API / Server
+        - label: Crypto / Security
+        - label: Docs
+  - type: textarea
+    id: additional
+    attributes:
+      label: Additional context
+      placeholder: Add any other context or screenshots here
+    validations:
+      required: false

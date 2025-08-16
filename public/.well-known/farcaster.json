@@ -1,0 +1,55 @@
+{
+    "accountAssociation": {
+        "header": "eyJmaWQiOjE5MzMyOCwidHlwZSI6ImN1c3RvZHkiLCJrZXkiOiIweDVlQjQwMTQ1MjM4NDQ1NDZGNTk1YjNBRWYwNTQyODE3NDQxMDg4NTcifQ",
+        "payload": "eyJkb21haW4iOiJkZWxlLnRvIn0",
+        "signature": "MHg2MmJjYzk5NTkwN2FiMTY3NGYxNzk4MWNjMGM3YzQ0ODI2ZTMzMmQ0YTI2OTM0MDE5NTBiMDQ5NzYxOGVmYjZkMjU3ZGM1Y2EyOTk3NGVhOWQ5ZTA4NDYyNDQyOTgyNjY1OGIzYTU1ZDA5NWZkNWY3M2U0ZWM2NWFlODJmMWE5ODFj"
+    },
+    "frame": {
+        "version": "1",
+        "name": "DELE.TO",
+        "subtitle": "Secure Credential Sharing",
+        "tagline": "Secure Secret Sharing",
+        "description": "Share sensitive credentials and secrets securely with client-side AES-256 encryption, zero-knowledge architecture, and automatic self-destruction.",
+        "primaryCategory": "productivity",
+        "tags": [
+            "security",
+            "encryption",
+            "privacy",
+            "credentials",
+            "sharing"
+        ],
+        "ogTitle": "DELE.TO Secure Sharing",
+        "ogDescription": "Secure credential sharing with client-side AES-256 encryption",
+        "ogImageUrl": "https://dele.to/SEO.png",
+        "iconUrl": "https://dele.to/favicon.png",
+        "homeUrl": "https://dele.to/miniapp",
+        "imageUrl": "https://dele.to/SEO.png",
+        "heroImageUrl": "https://dele.to/SEO.png",
+        "buttonTitle": "🔒 Share Securely",
+        "splashImageUrl": "https://dele.to/favicon.png",
+        "splashBackgroundColor": "#f8fafc"
+    },
+    "miniApp": {
+        "name": "DELE.TO",
+        "subtitle": "Secure Credential Sharing",
+        "tagline": "Secure Secret Sharing",
+        "description": "Share sensitive credentials and secrets securely with client-side AES-256 encryption, zero-knowledge architecture, and automatic self-destruction.",
+        "primaryCategory": "productivity",
+        "tags": [
+            "security",
+            "encryption",
+            "privacy",
+            "credentials",
+            "sharing"
+        ],
+        "ogTitle": "DELE.TO Secure Sharing",
+        "ogDescription": "Secure credential sharing with client-side AES-256 encryption",
+        "ogImageUrl": "https://dele.to/SEO.png",
+        "icon": "https://dele.to/favicon.png",
+        "url": "https://dele.to/miniapp",
+        "heroImageUrl": "https://dele.to/SEO.png",
+        "buttonTitle": "🔒 Share Securely",
+        "splashImageUrl": "https://dele.to/favicon.png",
+        "splashBackgroundColor": "#f8fafc"
+    }
+}
