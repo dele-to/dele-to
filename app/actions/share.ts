@@ -5,8 +5,8 @@ import { writeFile, readFile, mkdir } from "fs/promises"
 import { existsSync } from "fs"
 import path from "path"
 
-// Logging utility - set to false to disable all logs
-const DEBUG_ENABLED = false
+// Logging utility
+const DEBUG_ENABLED = process.env.DEBUG_ENABLED || false
 const log = DEBUG_ENABLED ? console.log : () => {}
 const logError = DEBUG_ENABLED ? console.error : () => {}
 const logWarn = DEBUG_ENABLED ? console.warn : () => {}

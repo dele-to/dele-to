@@ -1,0 +1,25 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      UPSTASH_REDIS_REST_URL: http://serverless-redis-http:80
+      UPSTASH_REDIS_REST_TOKEN: example_token
+    depends_on:
+      - serverless-redis-http
+
+
+  redis:
+    image: "redis:alpine"
+
+  serverless-redis-http:
+    image: hiett/serverless-redis-http:latest
+    environment:
+      SRH_MODE: env
+      SRH_TOKEN: example_token
+      SRH_CONNECTION_STRING: 'redis://redis:6379'
+    depends_on:
+      - redis
