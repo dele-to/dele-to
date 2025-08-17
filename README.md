@@ -12,6 +12,7 @@ DELE.TO is a modern, secure platform for sharing sensitive information like pass
 ## 📋 Table of Contents
 
 - [✨ Features](#-features)
+- [📸 Screenshots](#-screenshots)
 - [🚀 Quick Start](#-quick-start)
 - [🏗️ Architecture Overview](#️-architecture-overview)
 - [🔐 Encryption & Decryption Process](#-encryption--decryption-process)
@@ -32,6 +33,15 @@ DELE.TO is a modern, secure platform for sharing sensitive information like pass
 - 🌐 **URL fragment keys** - Encryption keys never sent to server
 - 💾 **Redis storage** - Encrypted data with automatic TTL cleanup
 - 📱 **Responsive design** - Works on all devices
+
+## 📸 Screenshots
+
+<div style="display: flex; overflow-x: auto; white-space: nowrap; padding-bottom: 20px;">
+  <img src=".github/screen1.png" alt="Create a new share" width="400" style="margin-right: 10px; border-radius: 8px; border: 1px solid #ddd;">
+  <img src=".github/screen2.png" alt="View a share" width="400" style="margin-right: 10px; border-radius: 8px; border: 1px solid #ddd;">
+  <img src=".github/screen3.png" alt="Share created confirmation" width="400" style="border-radius: 8px; border: 1px solid #ddd;">
+</div>
+
 
 ## 🚀 Quick Start
 
