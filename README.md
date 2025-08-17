@@ -104,6 +104,23 @@ The app will be available at **http://localhost:3000**
 3. Enter some test data and create a share
 4. Copy the generated link and test viewing it
 
+### Running with Docker
+
+#### Manual Setup (without Redis - local file storage)
+
+```bash
+docker build -t dele-to .
+## This persists the shares data to your host machine (as Redis is not used)
+docker run -p 3000:3000 -v "$(pwd)/.secure-shares:/app/.secure-shares" --name dele-to dele-to
+```
+#### To run with Redis (recommended for production):
+
+```bash
+docker compose up --build -d
+```
+
+The application will be available at **http://localhost:3000**.
+
 ## 🏗️ Architecture Overview
 
 <details>
