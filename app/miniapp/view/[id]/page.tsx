@@ -22,7 +22,7 @@ export default function MiniAppViewPage({ params }: { params: { id: string } }) 
   }, [])
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 p-4">
+    <div className="min-h-screen p-4">
       <div className="container mx-auto max-w-2xl py-8">
         <div className="mb-6">
           <Link href="/miniapp">

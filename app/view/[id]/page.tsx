@@ -117,6 +117,13 @@ export default function ViewPage({ params }: { params: { id: string } }) {
         try {
           const key = await SecureCrypto.importKey(keyFromUrl)
           setEncryptionKey(key)
+
+          // *** VULNERABILITY FIX ***
+          // After storing the key, remove it from the URL to prevent it from being
+          // included in the Next.js router state and sent to the server.
+          const urlWithoutHash = window.location.pathname + window.location.search
+          window.history.replaceState({}, document.title, urlWithoutHash)
+          
         } catch (error) {
           setError("Invalid or corrupted encryption key in URL")
         }
@@ -193,7 +200,7 @@ export default function ViewPage({ params }: { params: { id: string } }) {
 
   if (!isClient) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
           <p>Loading secure decryption...</p>
@@ -204,7 +211,7 @@ export default function ViewPage({ params }: { params: { id: string } }) {
 
   if (showContent && share) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 p-4">
+      <div className="min-h-screen p-4">
         <div className="container mx-auto max-w-2xl py-16">
           <Card>
             <CardHeader>
@@ -274,7 +281,7 @@ export default function ViewPage({ params }: { params: { id: string } }) {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 p-4">
+    <div className="min-h-screen p-4">
       <div className="container mx-auto max-w-md py-16">
         <Card>
           <CardHeader className="text-center">
