@@ -55,6 +55,7 @@
     "lucide-react": "^0.454.0",
     "next": "14.2.30",
     "next-themes": "^0.4.4",
+    "patch-package": "^8.0.0",
     "react": "^18",
     "react-day-picker": "9.8.0",
     "react-dom": "^18",
@@ -83,5 +84,10 @@
     "tailwindcss": "^3.4.17",
     "typescript": "^5"
   },
-  "packageManager": "pnpm@9.4.0+sha512.f549b8a52c9d2b8536762f99c0722205efc5af913e77835dbccc3b0b0b2ca9e7dc8022b78062c17291c48e88749c70ce88eb5a74f1fa8c4bf5e18bb46c8bd83a"
+  "packageManager": "pnpm@9.4.0+sha512.f549b8a52c9d2b8536762f99c0722205efc5af913e77835dbccc3b0b0b2ca9e7dc8022b78062c17291c48e88749c70ce88eb5a74f1fa8c4bf5e18bb46c8bd83a",
+  "pnpm": {
+    "patchedDependencies": {
+      "next@14.2.30": "patches/next@14.2.30.patch"
+    }
+  }
 }

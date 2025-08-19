@@ -1,0 +1,35 @@
+diff --git a/dist/client/components/router-reducer/fetch-server-response.js b/dist/client/components/router-reducer/fetch-server-response.js
+index 2d9c0421488770c601c1f119255fb88db9ebbe14..a2e59a8ba8ea4a3f9fe5507d2903bacbf2d1c2f1 100644
+--- a/dist/client/components/router-reducer/fetch-server-response.js
++++ b/dist/client/components/router-reducer/fetch-server-response.js
+@@ -32,7 +32,7 @@ async function fetchServerResponse(url, flightRouterState, nextUrl, currentBuild
+         // Enable flight response
+         [_approuterheaders.RSC_HEADER]: "1",
+         // Provide the current router state
+-        [_approuterheaders.NEXT_ROUTER_STATE_TREE]: encodeURIComponent(JSON.stringify(flightRouterState))
++        // [_approuterheaders.NEXT_ROUTER_STATE_TREE]: encodeURIComponent(JSON.stringify(flightRouterState))
+     };
+     /**
+    * Three cases:
+@@ -50,7 +50,7 @@ async function fetchServerResponse(url, flightRouterState, nextUrl, currentBuild
+     }
+     const uniqueCacheQuery = (0, _hash.hexHash)([
+         headers[_approuterheaders.NEXT_ROUTER_PREFETCH_HEADER] || "0",
+-        headers[_approuterheaders.NEXT_ROUTER_STATE_TREE],
++        // headers[_approuterheaders.NEXT_ROUTER_STATE_TREE],
+         headers[_approuterheaders.NEXT_URL]
+     ].join(","));
+     try {
+diff --git a/dist/client/components/router-reducer/reducers/server-action-reducer.js b/dist/client/components/router-reducer/reducers/server-action-reducer.js
+index cfb978bbdef2799fabc2c0d3fba1ec92af4802b2..a5e7fc269ccc00319c9fa81a681d43b8368eb8f4 100644
+--- a/dist/client/components/router-reducer/reducers/server-action-reducer.js
++++ b/dist/client/components/router-reducer/reducers/server-action-reducer.js
+@@ -34,7 +34,7 @@ async function fetchServerAction(state, nextUrl, param) {
+         headers: {
+             Accept: _approuterheaders.RSC_CONTENT_TYPE_HEADER,
+             [_approuterheaders.ACTION]: actionId,
+-            [_approuterheaders.NEXT_ROUTER_STATE_TREE]: encodeURIComponent(JSON.stringify(state.tree)),
++            // [_approuterheaders.NEXT_ROUTER_STATE_TREE]: encodeURIComponent(JSON.stringify(state.tree)),
+             ...process.env.NEXT_DEPLOYMENT_ID ? {
+                 "x-deployment-id": process.env.NEXT_DEPLOYMENT_ID
+             } : {},
