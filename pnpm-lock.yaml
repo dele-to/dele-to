@@ -142,6 +142,9 @@ importers:
       patch-package:
         specifier: ^8.0.0
         version: 8.0.0
+      qrcode.react:
+        specifier: ^4.2.0
+        version: 4.2.0(react@18.0.0)
       react:
         specifier: ^18
         version: 18.0.0
@@ -188,6 +191,9 @@ importers:
       '@types/node':
         specifier: ^22
         version: 22.0.0
+      '@types/qrcode.react':
+        specifier: ^3.0.0
+        version: 3.0.0(react@18.0.0)
       '@types/react':
         specifier: ^18
         version: 18.0.0
@@ -1557,6 +1563,10 @@ packages:
 
   '@types/prop-types@15.7.15':
     resolution: {integrity: sha512-F6bEyamV9jKGAFBEmlQnesRPGOQqS2+Uwi0Em15xenOxHaf2hv6L8YCVn3rPdPJOiJfPiCnLIRyvwVaqMY3MIw==}
+
+  '@types/qrcode.react@3.0.0':
+    resolution: {integrity: sha512-VPHYhnDfvt4LjlWajpYWRBVqmftEEza3GJVhe8sS5Wew0n4nTkg3+2MYunAiU6t04AZt0s/hkkMovefWeENjAQ==}
+    deprecated: This is a stub types definition. qrcode.react provides its own type definitions, so you do not need this installed.
 
   '@types/react-dom@18.0.0':
     resolution: {integrity: sha512-49897Y0UiCGmxZqpC8Blrf6meL8QUla6eb+BBhn69dTXlmuOlzkfr7HHY/O8J25e1lTUMs+YYxSlVDAaGHCOLg==}
@@ -3668,6 +3678,11 @@ packages:
 
   pure-rand@6.1.0:
     resolution: {integrity: sha512-bVWawvoZoBYpp6yIoQtQXHZjmz35RSVHnUOTefl8Vcjr8snTPY1wnpSPMWekcFwbxI6gtmT7rSYPFvz71ldiOA==}
+
+  qrcode.react@4.2.0:
+    resolution: {integrity: sha512-QpgqWi8rD9DsS9EP3z7BT+5lY5SFhsqGjpgW5DY/i3mK4M9DTBNz3ErMi8BWYEfI3L0d8GIbGmcdFAS1uIRGjA==}
+    peerDependencies:
+      react: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
 
   querystringify@2.2.0:
     resolution: {integrity: sha512-FIqgj2EUvTa7R50u0rGsyTftzjYmv/a3hO345bZNrqabNqjtgiDMgmo4mkUjd+nzU5oF3dClKqFIPUKybUyqoQ==}
@@ -5906,6 +5921,12 @@ snapshots:
       undici-types: 6.11.1
 
   '@types/prop-types@15.7.15': {}
+
+  '@types/qrcode.react@3.0.0(react@18.0.0)':
+    dependencies:
+      qrcode.react: 4.2.0(react@18.0.0)
+    transitivePeerDependencies:
+      - react
 
   '@types/react-dom@18.0.0':
     dependencies:
@@ -8445,6 +8466,10 @@ snapshots:
   punycode@2.3.1: {}
 
   pure-rand@6.1.0: {}
+
+  qrcode.react@4.2.0(react@18.0.0):
+    dependencies:
+      react: 18.0.0
 
   querystringify@2.2.0: {}
 
