@@ -80,20 +80,25 @@ export function AccessTips() {
                         <h4 className="font-semibold text-sm text-red-900">💡 Access Tip: {currentTip.title}</h4>
                         <div className="flex items-center gap-2">
                             <Button
+                                type="button"
                                 variant="ghost"
                                 size="sm"
                                 onClick={getNewTip}
                                 className="h-6 px-2 text-xs hover:opacity-80 text-red-600"
+                                aria-label="Get new access tip"
                             >
                                 New Tip
                             </Button>
                             <Button
+                                type="button"
                                 variant="ghost"
                                 size="sm"
                                 onClick={dismissTip}
                                 className="h-6 w-6 p-0 hover:opacity-80 text-red-600"
+                                aria-label="Dismiss tip"
+                                title="Dismiss tip"
                             >
-                                <X className="h-3 w-3" />
+                                <X className="h-3 w-3" aria-hidden="true" />
                             </Button>
                         </div>
                     </div>
