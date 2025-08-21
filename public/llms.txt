@@ -1,0 +1,35 @@
+# DELE.TO - Secure Credential Sharing Platform
+
+## Overview
+DELE.TO is a secure, privacy-focused platform for sharing sensitive information like passwords, API keys, and confidential messages. All encryption happens client-side using AES-256 encryption, ensuring that even we cannot access your secrets.
+
+## Key Features
+- Client-side AES-256 encryption
+- Temporary links with configurable expiration
+- View limits (burn after reading)
+- Optional password protection
+- QR code generation for easy mobile sharing
+- No server-side storage of decryption keys
+
+## Technology Stack
+- Next.js 14 with TypeScript
+- Tailwind CSS for styling
+- Upstash Redis for temporary storage
+- Client-side cryptography
+- Comprehensive security headers (CSP, HSTS, etc.)
+
+## Security Model
+1. Secrets are encrypted in the browser before transmission
+2. Decryption keys are stored in URL fragments (never sent to server)
+3. Encrypted data is temporarily stored on Redis with TTL
+4. Keys are automatically destroyed after expiration or view limits
+
+## Privacy Commitment
+We cannot decrypt your secrets. The encryption key never leaves your browser and is never transmitted to our servers. This ensures true end-to-end encryption for your sensitive data.
+
+## Use Cases
+- Sharing passwords securely
+- Distributing API keys
+- Sending confidential messages
+- Temporary credential sharing
+- Secure communication in teams

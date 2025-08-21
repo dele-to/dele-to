@@ -10,7 +10,7 @@ export default function HomePage() {
       <div className="container mx-auto px-4 py-16">
         <div className="text-center mb-16">
           <div className="flex justify-center mb-6">
-            <div className="p-3 rounded-full" style={{ backgroundColor: '#D2461E' }}>
+            <div className="p-3 rounded-full bg-red-600">
               <Flame className="w-8 h-8 text-white" />
             </div>
           </div>
@@ -22,7 +22,7 @@ export default function HomePage() {
           </p>
           <div className="flex gap-4 justify-center">
             <Link href="/create">
-              <Button size="lg" style={{ backgroundColor: '#D2461E' }} className="hover:opacity-90 text-white">
+              <Button size="lg" className="hover:opacity-90 text-white bg-red-600">
                 Share Securely
               </Button>
             </Link>

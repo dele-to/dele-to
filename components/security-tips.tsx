@@ -95,19 +95,18 @@ export function SecurityTips() {
   }
 
   return (
-    <Alert className="mb-6" style={{ borderColor: '#D2461E', backgroundColor: '#FDF2F2' }}>
+    <Alert className="mb-6 border-red-600 bg-red-50">
       <div className="flex items-start gap-3">
-        <Lightbulb className="h-5 w-5 mt-0.5 flex-shrink-0" style={{ color: '#D2461E' }} />
+        <Lightbulb className="h-5 w-5 mt-0.5 flex-shrink-0 text-red-600" />
         <div className="flex-1">
           <div className="flex items-center justify-between">
-            <h4 className="font-semibold text-sm" style={{ color: '#8B1A00' }}>💡 Security Tip: {currentTip.title}</h4>
+            <h4 className="font-semibold text-sm text-red-900">💡 Security Tip: {currentTip.title}</h4>
             <div className="flex items-center gap-2">
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={getNewTip}
-                className="h-6 px-2 text-xs hover:opacity-80"
-                style={{ color: '#D2461E' }}
+                className="h-6 px-2 text-xs hover:opacity-80 text-red-600"
               >
                 New Tip
               </Button>
@@ -115,14 +114,13 @@ export function SecurityTips() {
                 variant="ghost"
                 size="sm"
                 onClick={dismissTip}
-                className="h-6 w-6 p-0 hover:opacity-80"
-                style={{ color: '#D2461E' }}
+                className="h-6 w-6 p-0 hover:opacity-80 text-red-600"
               >
                 <X className="h-3 w-3" />
               </Button>
             </div>
           </div>
-          <AlertDescription className="text-sm mt-1" style={{ color: '#B91C1C' }}>
+          <AlertDescription className="text-sm mt-1 text-red-700">
             {currentTip.description}
           </AlertDescription>
         </div>
