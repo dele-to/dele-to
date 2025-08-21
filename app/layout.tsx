@@ -6,20 +6,21 @@ import { ConsoleMessage } from '@/components/console-message'
 import './globals.css'
 
 export const metadata: Metadata = {
-  title: 'DELE.TO | Your Secret, Your Key, Our Link',
+  title: 'DELETO | Secure Credential Sharing',
   description: 'Secure credential sharing with client-side AES-256 encryption',
+  keywords: 'secure sharing, password sharing, credential sharing, AES encryption, temporary links, secret sharing, encrypted messages, secure communication, privacy, cybersecurity',
   icons: {
     icon: '/favicon.ico',
   },
 
   openGraph: {
-    title: 'DELE.TO | Your Secret, Your Key, Our Link',
+    title: 'DELETO | Secure Credential Sharing',
     description: 'Secure credential sharing with client-side AES-256 encryption',
     images: ['/SEO.png'],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'DELE.TO | Your Secret, Your Key, Our Link',
+    title: 'DELETO | Secure Credential Sharing',
     description: 'Secure credential sharing with client-side AES-256 encryption',
     images: ['/SEO.png'],
   },
@@ -32,11 +33,11 @@ export const metadata: Metadata = {
     'fc:miniapp:splashImageUrl': 'https://dele.to/favicon.png',
     'fc:miniapp:splashBackgroundColor': '#f8fafc',
     'fc:miniapp:manifest': 'https://dele.to/.well-known/farcaster.json',
-    'og:title': 'DELE.TO | Your Secret, Your Key, Our Link',
+    'og:title': 'DELETO | Secure Credential Sharing',
     'og:description': 'Secure credential sharing with client-side AES-256 encryption',
     'og:image': 'https://dele.to/SEO.png',
     'twitter:card': 'summary_large_image',
-    'twitter:title': 'DELE.TO | Your Secret, Your Key, Our Link',
+    'twitter:title': 'DELETO | Secure Credential Sharing',
     'twitter:description': 'Secure credential sharing with client-side AES-256 encryption',
     'twitter:image': 'https://dele.to/SEO.png',
   },

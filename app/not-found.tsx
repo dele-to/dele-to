@@ -104,7 +104,7 @@ export default function NotFound() {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 mx-auto mb-4" style={{ borderColor: '#D2461E' }}></div>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-red-600 mx-auto mb-4"></div>
           <p>Loading...</p>
         </div>
       </div>
@@ -117,15 +117,15 @@ export default function NotFound() {
         <Card className="text-center">
           <CardHeader>
             <div className="flex justify-center mb-4">
-              <div className="p-4 rounded-full" style={{ backgroundColor: '#D2461E' }}>
+              <div className="p-4 rounded-full bg-red-600">
                 <Flame className="w-12 h-12 text-white" />
               </div>
             </div>
             <div className="text-6xl mb-4">{currentMessage.emoji}</div>
-            <CardTitle className="text-2xl mb-2" style={{ color: '#8B1A00' }}>
+            <CardTitle className="text-2xl mb-2 text-red-900">
               404 - {currentMessage.title}
             </CardTitle>
-            <CardDescription className="text-lg" style={{ color: '#B91C1C' }}>
+            <CardDescription className="text-lg text-red-700">
               {currentMessage.description}
             </CardDescription>
           </CardHeader>
@@ -134,8 +134,7 @@ export default function NotFound() {
               <Link href="/" className="w-full">
                 <Button 
                   size="lg" 
-                  className="w-full text-white hover:opacity-90"
-                  style={{ backgroundColor: '#D2461E' }}
+                  className="w-full text-white hover:opacity-90 bg-red-600"
                 >
                   <Home className="w-4 h-4 mr-2" />
                   {currentMessage.buttonText}
@@ -150,8 +149,8 @@ export default function NotFound() {
               </Link>
             </div>
 
-            <div className="mt-8 p-4 rounded-lg" style={{ backgroundColor: '#FDF2F2', borderColor: '#D2461E', borderWidth: '1px' }}>
-              <p className="text-sm" style={{ color: '#B91C1C' }}>
+            <div className="mt-8 p-4 rounded-lg bg-red-50 border border-red-600">
+              <p className="text-sm text-red-700">
                 <strong>Lost?</strong> Don't worry, your secrets are still safe. 
                 This page just followed DELE.TO's philosophy and self-destructed.
               </p>

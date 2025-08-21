@@ -24,6 +24,7 @@ const nextConfig = {
   images: {
     unoptimized: true,
   },
+  compress: true,
   async headers() {
     return [
       {
