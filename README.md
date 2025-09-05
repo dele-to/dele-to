@@ -1,4 +1,9 @@
-# DELE.TO 🔥
+# DELE.TO 🔥 [![License: MIT][license-badge]][license] [![Buy me a Coffee][buy-me-a-coffee-badge]][buy-me-a-coffee]
+
+[license]: https://opensource.org/licenses/MIT
+[license-badge]: https://img.shields.io/badge/License-MIT-blue.svg
+[buy-me-a-coffee-badge]: https://img.shields.io/badge/Buy_Me_A_Coffee-FFDD00?style=flat&logo=buy-me-a-coffee&logoColor=black
+[buy-me-a-coffee]: https://www.buymeacoffee.com/arddluma
 
 *From Latin dēlētō — "erase, destroy."*
 
