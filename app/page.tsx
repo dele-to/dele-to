@@ -3,20 +3,15 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Flame, Clock, Lock, Key, Server } from "lucide-react"
 import Link from "next/link"
 import { SecurityTips } from "@/components/security-tips"
-import { ThemeToggle } from "@/components/theme-toggle"
+import { LogoThemeSwitcher } from "@/components/logo-theme-switcher"
 
 export default function HomePage() {
   return (
     <div className="min-h-screen">
-      <div className="fixed top-4 right-4 z-50">
-        <ThemeToggle />
-      </div>
       <div className="container mx-auto px-4 py-16">
         <div className="text-center mb-16">
           <div className="flex justify-center mb-6">
-            <div className="p-3 rounded-full bg-orange-600">
-              <Flame className="w-8 h-8 text-white" />
-            </div>
+            <LogoThemeSwitcher />
           </div>
           <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-2">DELE.TO</h1>
           <p className="text-sm text-gray-500 dark:text-gray-400 italic mb-6">From Latin dēlētō — “erase, destroy.”</p>
@@ -146,8 +141,6 @@ export default function HomePage() {
             </p>
           </div>
         </div>
-
-
       </div>
     </div>
   )
