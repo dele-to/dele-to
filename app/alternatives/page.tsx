@@ -92,10 +92,10 @@ export default function AlternativesPage() {
         <div className="max-w-7xl mx-auto">
           {/* Header */}
           <div className="text-center mb-12">
-            <h1 className="text-4xl font-bold text-gray-900 mb-4">
+            <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">
               DELE.TO - Alternative to Popular Password Sharing Tools
             </h1>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+            <p className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
               Compare the top 3 secure password sharing tools. Find the perfect solution
               for your security needs, team size, and technical requirements.
             </p>
@@ -153,11 +153,11 @@ export default function AlternativesPage() {
                         </div>
                         <div>
                           <span className="font-medium">Price:</span>
-                          <div className="text-xs text-gray-600">{alt.pricing}</div>
+                          <div className="text-xs text-gray-600 dark:text-gray-400">{alt.pricing}</div>
                         </div>
                       </div>
 
-                      <div className="text-xs text-gray-600">
+                      <div className="text-xs text-gray-600 dark:text-gray-400">
                         <strong>Best for:</strong> {alt.bestFor}
                       </div>
 
@@ -273,7 +273,9 @@ export default function AlternativesPage() {
                 <div className="space-y-3">
                   <div>
                     <p className="font-medium">Best Choice: DELE.TO</p>
-                    <p className="text-sm text-gray-600">Perfect balance of security and usability</p>
+                    <p className="text-sm text-gray-600">
+                      Perfect balance of security and usability
+                    </p>
                   </div>
                   <div>
                     <p className="font-medium">Alternative: Yopass</p>
