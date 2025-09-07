@@ -1,7 +1,7 @@
 'use client'
 
 import { useTheme } from 'next-themes'
-import { Flame, Sun, Moon } from 'lucide-react'
+import { Flame, Moon } from 'lucide-react'
 import { useState, useEffect } from 'react'
 
 export function LogoThemeSwitcher() {
@@ -24,13 +24,11 @@ export function LogoThemeSwitcher() {
   const handleThemeSwitch = () => {
     setIsAnimating(true)
     
-    // Cycle through themes: light -> dark -> system -> light
-    if (theme === 'light') {
-      setTheme('dark')
-    } else if (theme === 'dark') {
-      setTheme('system')
-    } else {
+    // Toggle between dark and light (system stays as system)
+    if (theme === 'dark') {
       setTheme('light')
+    } else {
+      setTheme('dark')
     }
 
     // Reset animation after completion
@@ -38,25 +36,18 @@ export function LogoThemeSwitcher() {
   }
 
   const getLogoVariant = () => {
-    switch (theme) {
-      case 'light':
-        return {
-          bgColor: 'bg-orange-600 hover:bg-orange-700',
-          icon: <Flame className="w-8 h-8 text-white" />,
-          label: 'Light Theme'
-        }
-      case 'dark':
-        return {
-          bgColor: 'bg-slate-800 hover:bg-slate-700 border-2 border-slate-600',
-          icon: <Moon className="w-8 h-8 text-slate-200" />,
-          label: 'Dark Theme'
-        }
-      default: // system
-        return {
-          bgColor: 'bg-gradient-to-br from-orange-500 to-slate-700 hover:from-orange-600 hover:to-slate-600',
-          icon: <Sun className="w-8 h-8 text-white" />,
-          label: 'System Theme'
-        }
+    if (theme === 'dark') {
+      return {
+        bgColor: 'bg-slate-800 hover:bg-slate-700 border-2 border-slate-600',
+        icon: <Moon className="w-8 h-8 text-slate-200" />,
+        label: 'Dark Theme'
+      }
+    } else {
+      return {
+        bgColor: 'bg-orange-600 hover:bg-orange-700',
+        icon: <Flame className="w-8 h-8 text-white" />,
+        label: 'Light Theme'
+      }
     }
   }
 
@@ -74,14 +65,14 @@ export function LogoThemeSwitcher() {
           shadow-lg hover:shadow-xl
           relative overflow-hidden
         `}
-        title={`Switch to next theme (Current: ${logoVariant.label})`}
+        title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} theme (Current: ${logoVariant.label})`}
         aria-label={`Theme switcher - ${logoVariant.label}`}
       >
         {/* Animated background effect */}
         <div className={`
           absolute inset-0 rounded-full opacity-0 transition-opacity duration-300
           ${isAnimating ? 'opacity-20 animate-ping' : ''}
-          ${theme === 'light' ? 'bg-orange-400' : theme === 'dark' ? 'bg-slate-600' : 'bg-gradient-to-br from-orange-400 to-slate-600'}
+          ${theme === 'dark' ? 'bg-slate-600' : 'bg-orange-400'}
         `} />
         
         {/* Icon with rotation animation */}
@@ -95,7 +86,6 @@ export function LogoThemeSwitcher() {
       
       {/* Theme indicator dots */}
       <div className="flex gap-1">
-        <div className={`w-2 h-2 rounded-full transition-all duration-200 ${theme === 'light' ? 'bg-orange-600 scale-125' : 'bg-gray-300 dark:bg-gray-600'}`} />
         <div className={`w-2 h-2 rounded-full transition-all duration-200 ${theme === 'dark' ? 'bg-slate-700 scale-125' : 'bg-gray-300 dark:bg-gray-600'}`} />
         <div className={`w-2 h-2 rounded-full transition-all duration-200 ${theme === 'system' ? 'bg-gradient-to-r from-orange-500 to-slate-700 scale-125' : 'bg-gray-300 dark:bg-gray-600'}`} />
       </div>
