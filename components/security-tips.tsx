@@ -95,20 +95,19 @@ export function SecurityTips() {
   }
 
   return (
-    <Alert className="mb-6 border-red-600 bg-red-50">
+    <Alert className="mb-6 border-orange-600 bg-orange-50 dark:border-orange-400 dark:bg-orange-950/20">
       <div className="flex items-start gap-3">
-        <Lightbulb className="h-5 w-5 mt-0.5 flex-shrink-0 text-red-600" />
+        <Lightbulb className="h-5 w-5 mt-0.5 flex-shrink-0 text-orange-600 dark:text-orange-400" />
         <div className="flex-1">
           <div className="flex items-center justify-between">
-            <h4 className="font-semibold text-sm text-red-900">💡 Security Tip: {currentTip.title}</h4>
+            <h4 className="font-semibold text-sm text-orange-900 dark:text-orange-200">💡 Security Tip: {currentTip.title}</h4>
             <div className="flex items-center gap-2">
               <Button
                 type="button"
                 variant="ghost"
                 size="sm"
                 onClick={getNewTip}
-                className="h-6 px-2 text-xs hover:opacity-80 text-red-600"
-                aria-label="Add new tip"
+                className="h-6 px-2 text-xs hover:opacity-80 text-orange-600 dark:text-orange-400 hover:bg-orange-100 dark:hover:bg-orange-900/20"
               >
                 New Tip
               </Button>
@@ -117,14 +116,13 @@ export function SecurityTips() {
                 variant="ghost"
                 size="sm"
                 onClick={dismissTip}
-                className="h-6 w-6 p-0 hover:opacity-80 text-red-600"
-                aria-label="Dismiss tip"
+                className="h-6 w-6 p-0 hover:opacity-80 text-orange-600 dark:text-orange-400 hover:bg-orange-100 dark:hover:bg-orange-900/20"
               >
                 <X className="h-3 w-3" aria-hidden="true" />
               </Button>
             </div>
           </div>
-          <AlertDescription className="text-sm mt-1 text-red-700">
+          <AlertDescription className="text-sm mt-1 text-orange-800 dark:text-orange-300">
             {currentTip.description}
           </AlertDescription>
         </div>
