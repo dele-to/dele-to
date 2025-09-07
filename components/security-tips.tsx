@@ -103,6 +103,7 @@ export function SecurityTips() {
             <h4 className="font-semibold text-sm text-orange-900 dark:text-orange-200">💡 Security Tip: {currentTip.title}</h4>
             <div className="flex items-center gap-2">
               <Button
+                type="button"
                 variant="ghost"
                 size="sm"
                 onClick={getNewTip}
@@ -111,12 +112,13 @@ export function SecurityTips() {
                 New Tip
               </Button>
               <Button
+                type="button"
                 variant="ghost"
                 size="sm"
                 onClick={dismissTip}
                 className="h-6 w-6 p-0 hover:opacity-80 text-orange-600 dark:text-orange-400 hover:bg-orange-100 dark:hover:bg-orange-900/20"
               >
-                <X className="h-3 w-3" />
+                <X className="h-3 w-3" aria-hidden="true" />
               </Button>
             </div>
           </div>

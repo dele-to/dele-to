@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+
+# Sitemap
+Sitemap: https://dele.to/sitemap.xml
+
+# Disallow access to view pages (temporary secret links)
+Disallow: /view/

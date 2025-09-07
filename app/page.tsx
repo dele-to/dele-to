@@ -26,7 +26,7 @@ export default function HomePage() {
           </p>
           <div className="flex gap-4 justify-center">
             <Link href="/create">
-              <Button size="lg" style={{ backgroundColor: '#D2461E' }} className="hover:opacity-90 text-white">
+              <Button size="lg" className="hover:opacity-90 text-white bg-red-600">
                 Share Securely
               </Button>
             </Link>

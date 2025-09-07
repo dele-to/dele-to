@@ -12,13 +12,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { Copy, Shield, ArrowLeft, Key, RefreshCw, AlertTriangle, Link2 } from "lucide-react"
+import { Copy, Shield, ArrowLeft, Key, RefreshCw, AlertTriangle, Link2, QrCode } from "lucide-react"
 import Link from "next/link"
 import { createSecureShare } from "../actions/share"
 import { SecureCrypto } from "../../lib/crypto"
 import { SecurityTips } from "@/components/security-tips"
 import { InlineTip } from "@/components/inline-tip"
 import { PasswordInput } from "@/components/password-input"
+import { QrCodeModal } from "@/components/qr-code-modal"
 
 export default function CreatePage() {
   const [formData, setFormData] = useState({
@@ -33,6 +34,7 @@ export default function CreatePage() {
   const [shareLink, setShareLink] = useState("")
   const [isLoading, setIsLoading] = useState(false)
   const [copied, setCopied] = useState(false)
+  const [isQrModalOpen, setIsQrModalOpen] = useState(false)
   const [isClient, setIsClient] = useState(false)
   const [error, setError] = useState("")
 
@@ -139,6 +141,9 @@ export default function CreatePage() {
                   <Button onClick={copyToClipboard} variant="outline">
                     <Copy className="w-4 h-4" />
                   </Button>
+                  <Button onClick={() => setIsQrModalOpen(true)} variant="outline">
+                    <QrCode className="w-4 h-4" />
+                  </Button>
                 </div>
                 {copied && <p className="text-sm text-green-600 mt-1">Copied to clipboard!</p>}
               </div>
@@ -186,6 +191,12 @@ export default function CreatePage() {
               </div>
             </CardContent>
           </Card>
+          <QrCodeModal
+            isOpen={isQrModalOpen}
+            onClose={() => setIsQrModalOpen(false)}
+            url={shareLink}
+            title={formData.title}
+          />
         </div>
       </div>
     )
