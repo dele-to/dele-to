@@ -229,11 +229,11 @@ export default function ViewPage({ params }: { params: { id: string } }) {
               <div className="grid grid-cols-2 gap-4 text-sm">
                 <div className="flex items-center gap-2">
                   <Clock className="w-4 h-4 text-orange-500" />
-                  <span>{formatTimeRemaining(share.expiresAt)}</span>
+                  <span className="text-orange-600 dark:text-orange-400 font-medium">{formatTimeRemaining(share.expiresAt)}</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <Eye className="w-4 h-4 text-blue-500" />
-                  <span>
+                  <span className="text-blue-600 dark:text-blue-400 font-medium">
                     {share.currentViews}/{share.maxViews} views
                   </span>
                 </div>
@@ -241,9 +241,9 @@ export default function ViewPage({ params }: { params: { id: string } }) {
 
               <div>
                 <Label>Decrypted Content</Label>
-                <div className="mt-2 p-4 bg-gray-50 rounded-lg border">
+                <div className="mt-2 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg border dark:border-gray-700">
                   <div className="flex justify-between items-start gap-4">
-                    <pre className="whitespace-pre-wrap font-mono text-sm flex-1 break-all">{decryptedContent}</pre>
+                    <pre className="whitespace-pre-wrap font-mono text-sm flex-1 break-all text-gray-900 dark:text-gray-100">{decryptedContent}</pre>
                     <Button onClick={copyToClipboard} variant="outline" size="sm">
                       <Copy className="w-4 h-4" />
                     </Button>
@@ -303,15 +303,15 @@ export default function ViewPage({ params }: { params: { id: string } }) {
             <AccessTips />
             
             {metadata && (
-              <div className="mb-6 p-4 bg-gray-50 rounded-lg">
+              <div className="mb-6 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg border dark:border-gray-700">
                 <div className="grid grid-cols-2 gap-4 text-sm">
                   <div className="flex items-center gap-2">
                     <Clock className="w-4 h-4 text-orange-500" />
-                    <span>{formatTimeRemaining(metadata.expiresAt)}</span>
+                    <span className="text-orange-600 dark:text-orange-400 font-medium">{formatTimeRemaining(metadata.expiresAt)}</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <Eye className="w-4 h-4 text-blue-500" />
-                    <span>
+                    <span className="text-blue-600 dark:text-blue-400 font-medium">
                       {metadata.currentViews}/{metadata.maxViews} views
                     </span>
                   </div>
