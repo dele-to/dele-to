@@ -1,4 +1,5 @@
 # DELE.TO 🔥 [![License: MIT][license-badge]][license] [![Buy me a Coffee][buy-me-a-coffee-badge]][buy-me-a-coffee]
+<a href="https://www.producthunt.com/products/deleto?embed=true&utm_source=badge-featured&utm_medium=badge&utm_source=badge-deleto" target="_blank"><img src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=1013926&theme=light&t=1757328023430" alt="DELETO - Share&#0032;credentials&#0032;securely&#0032;with&#0032;E2E&#0032;encryption | Product Hunt" style="width: 250px; height: 54px;" width="250" height="54" /></a>
 
 [license]: https://opensource.org/licenses/MIT
 [license-badge]: https://img.shields.io/badge/License-MIT-blue.svg
