@@ -12,7 +12,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { Copy, Shield, ArrowLeft, Key, RefreshCw, AlertTriangle, Link2, QrCode, Plus, Trash2, Users, User } from "lucide-react"
+import { Badge } from "@/components/ui/badge"
+import { Copy, Shield, ArrowLeft, Key, RefreshCw, AlertTriangle, Link2, QrCode, Plus, Trash2, Users, User, X, Tag } from "lucide-react"
 import Link from "next/link"
 import { createSecureShare } from "../actions/share"
 import { SecureCrypto } from "../../lib/crypto"
@@ -68,6 +69,7 @@ export default function CreatePage() {
   const [qrModalTitle, setQrModalTitle] = useState("")
   const [isClient, setIsClient] = useState(false)
   const [error, setError] = useState("")
+  const [tags, setTags] = useState(["NEW"])
 
   useEffect(() => {
     setIsClient(true)
@@ -75,6 +77,7 @@ export default function CreatePage() {
 
   const addRecipient = () => {
     if (!newRecipientName.trim()) return
+    if (recipients.length >= 3) return
     
     const newRecipient: Recipient = {
       id: crypto.randomUUID(),
@@ -213,6 +216,15 @@ export default function CreatePage() {
     setQrModalLink(link)
     setQrModalTitle(title)
     setIsQrModalOpen(true)
+  }
+
+  const addTag = (tag: string) => {
+    if (tags.length >= 3) return
+    setTags([...tags, tag])
+  }
+
+  const removeTag = (tag: string) => {
+    setTags(tags.filter(t => t !== tag))
   }
 
   if (generatedLinks.length > 0) {
@@ -435,8 +447,13 @@ export default function CreatePage() {
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <Label htmlFor="multiRecipient">Multi-Recipient Sharing</Label>
-                    <p className="text-sm text-gray-600">Encrypt once, generate multiple links for different recipients</p>
+                    <div className="flex items-center gap-2">
+                      <Label htmlFor="multiRecipient">Multi-Recipient Sharing</Label>
+                      <Badge variant="outline" className="text-xs px-2 py-1">
+                        NEW
+                      </Badge>
+                    </div>
+                    <p className="text-sm text-gray-600">Encrypt once, generate multiple links for different recipients (max 3)</p>
                   </div>
                   <Switch
                     id="multiRecipient"
