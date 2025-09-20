@@ -52,6 +52,16 @@ export function Footer() {
                                 </Link>
                             </li>
                             <li>
+                                <Link href="/vs/privatebin" className="hover:text-foreground transition-colors">
+                                    vs PrivateBin
+                                </Link>
+                            </li>
+                            <li>
+                                <Link href="/vs/onetimesecret" className="hover:text-foreground transition-colors">
+                                    vs OneTimeSecret
+                                </Link>
+                            </li>
+                            <li>
                                 <Link href="/alternatives" className="hover:text-foreground transition-colors">
                                     All Alternatives
                                 </Link>

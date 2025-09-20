@@ -43,7 +43,7 @@ const comparisonData = [
   {
     feature: "Password Protection",
     deleto: true,
-    passwordpusher: false,
+    passwordpusher: true,
     details: "DELE.TO adds optional password layer"
   },
   {
@@ -72,15 +72,21 @@ const comparisonData = [
   },
   {
     feature: "Self-Hosted Option",
-    deleto: "coming-soon",
+    deleto: true,
     passwordpusher: true,
     details: "PasswordPusher available now, DELE.TO coming soon"
   },
   {
     feature: "Open Source",
-    deleto: "coming-soon",
+    deleto: true,
     passwordpusher: true,
-    details: "PasswordPusher available now, DELE.TO coming soon"
+    details: "Both are open source projects"
+  },
+  {
+    feature: "Multi-Recipient Sharing",
+    deleto: true,
+    passwordpusher: false,
+    details: "DELE.TO supports sharing to multiple recipients"
   },
   {
     feature: "API Access",
@@ -106,10 +112,10 @@ export default function PasswordPusherComparison() {
         <div className="max-w-6xl mx-auto">
           {/* Header */}
           <div className="text-center mb-12">
-            <h1 className="text-4xl font-bold text-gray-900 mb-4">
+            <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">
               DELE.TO - Alternative to PasswordPusher
             </h1>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+            <p className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
               Comparing client-side vs server-side encryption approaches. Both are popular,
               but they handle your data very differently.
             </p>
@@ -222,7 +228,7 @@ export default function PasswordPusherComparison() {
                   </thead>
                   <tbody>
                     {comparisonData.map((item, index) => (
-                      <tr key={index} className="border-b hover:bg-gray-50">
+                      <tr key={index} className="border-b hover:bg-gray-50 dark:hover:bg-gray-800">
                         <td className="py-3 px-4 font-medium">{item.feature}</td>
                         <td className="py-3 px-4 text-center">
                           {item.deleto === true ? (
