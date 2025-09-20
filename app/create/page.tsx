@@ -12,7 +12,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { Copy, Shield, ArrowLeft, Key, RefreshCw, AlertTriangle, Link2, QrCode } from "lucide-react"
+import { Badge } from "@/components/ui/badge"
+import { Copy, Shield, ArrowLeft, Key, RefreshCw, AlertTriangle, Link2, QrCode, Plus, Trash2, Users, User, X, Tag } from "lucide-react"
 import Link from "next/link"
 import { createSecureShare } from "../actions/share"
 import { SecureCrypto } from "../../lib/crypto"
@@ -21,26 +22,94 @@ import { InlineTip } from "@/components/inline-tip"
 import { PasswordInput } from "@/components/password-input"
 import { QrCodeModal } from "@/components/qr-code-modal"
 
+interface Recipient {
+  id: string
+  name: string
+  expirationTime: string
+  maxViews: number
+  requirePassword: boolean
+  password: string
+}
+
+interface GeneratedLink {
+  recipientId: string
+  recipientName: string
+  shareId: string
+  shareLink: string
+  expirationTime: string
+  maxViews: number
+  requirePassword: boolean
+}
+
 export default function CreatePage() {
   const [formData, setFormData] = useState({
     title: "",
     content: "",
+    linkType: "standard", // "standard" or "shorter"
+    multiRecipient: false,
+  })
+  
+  // Single recipient settings (when multiRecipient is false)
+  const [singleRecipientSettings, setSingleRecipientSettings] = useState({
     expirationTime: "1h",
     maxViews: 1,
     requirePassword: false,
     password: "",
-    linkType: "standard", // "standard" or "shorter"
   })
-  const [shareLink, setShareLink] = useState("")
+  
+  // Multi-recipient state
+  const [recipients, setRecipients] = useState<Recipient[]>([])
+  const [newRecipientName, setNewRecipientName] = useState("")
+  
+  const [generatedLinks, setGeneratedLinks] = useState<GeneratedLink[]>([])
   const [isLoading, setIsLoading] = useState(false)
-  const [copied, setCopied] = useState(false)
+  const [copiedLinkId, setCopiedLinkId] = useState<string | null>(null)
   const [isQrModalOpen, setIsQrModalOpen] = useState(false)
+  const [qrModalLink, setQrModalLink] = useState("")
+  const [qrModalTitle, setQrModalTitle] = useState("")
   const [isClient, setIsClient] = useState(false)
   const [error, setError] = useState("")
+  const [tags, setTags] = useState(["NEW"])
 
   useEffect(() => {
     setIsClient(true)
   }, [])
+
+  const addRecipient = () => {
+    if (!newRecipientName.trim()) return
+    if (recipients.length >= 3) return
+    
+    const newRecipient: Recipient = {
+      id: crypto.randomUUID(),
+      name: newRecipientName.trim(),
+      expirationTime: "1h",
+      maxViews: 1,
+      requirePassword: false,
+      password: "",
+    }
+    
+    setRecipients([...recipients, newRecipient])
+    setNewRecipientName("")
+  }
+
+  const removeRecipient = (id: string) => {
+    setRecipients(recipients.filter(r => r.id !== id))
+  }
+
+  const updateRecipient = (id: string, updates: Partial<Recipient>) => {
+    setRecipients(recipients.map(r => r.id === id ? { ...r, ...updates } : r))
+  }
+
+  const generateSecurePassword = (recipientId?: string) => {
+    if (!isClient) return
+    const password = SecureCrypto.generateSecurePassword()
+    
+    if (recipientId) {
+      updateRecipient(recipientId, { password })
+    } else {
+      setSingleRecipientSettings({ ...singleRecipientSettings, password })
+    }
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -52,53 +121,83 @@ export default function CreatePage() {
       return
     }
 
-    if (formData.requirePassword && !formData.password.trim()) {
-      setError("Please enter a password or disable password protection")
+    if (formData.multiRecipient && recipients.length === 0) {
+      setError("Please add at least one recipient for multi-recipient sharing")
       return
+    }
+
+    // Validate passwords for recipients that require them
+    const recipientsToProcess = formData.multiRecipient ? recipients : [{
+      id: 'single',
+      name: 'Single Recipient',
+      ...singleRecipientSettings
+    }]
+
+    for (const recipient of recipientsToProcess) {
+      if (recipient.requirePassword && !recipient.password.trim()) {
+        setError(`Please enter a password for ${recipient.name} or disable password protection`)
+        return
+      }
     }
 
     setIsLoading(true)
     setError("")
 
     try {
-      // Generate encryption key client-side
+      // Generate encryption key client-side (same key for all recipients)
       const encryptionKey = await SecureCrypto.generateKey()
       const keyString = await SecureCrypto.exportKey(encryptionKey)
 
-      // Encrypt content client-side
+      // Encrypt content client-side (once for all recipients)
       const { encrypted, iv } = await SecureCrypto.encrypt(formData.content, encryptionKey)
 
-      // Send only encrypted data to server
-      const result = await createSecureShare({
-        title: formData.title,
-        encryptedContent: encrypted,
-        iv: iv,
-        expirationTime: formData.expirationTime,
-        maxViews: formData.maxViews,
-        requirePassword: formData.requirePassword,
-        password: formData.password,
-        linkType: formData.linkType,
-      })
+      const links: GeneratedLink[] = []
 
-      if (result.success && result.id) {
-        const shareId = result.id
+      // Create separate shares for each recipient
+      for (const recipient of recipientsToProcess) {
+        const result = await createSecureShare({
+          title: formData.title,
+          encryptedContent: encrypted,
+          iv: iv,
+          expirationTime: recipient.expirationTime,
+          maxViews: recipient.maxViews,
+          requirePassword: recipient.requirePassword,
+          password: recipient.password,
+          linkType: formData.linkType,
+        })
 
-        // Immediate verification - wait a moment then test if it exists
-        setTimeout(async () => {
-          try {
-            const { testShareExists } = await import("../actions/share")
-            await testShareExists(shareId)
-          } catch (error) {
-            console.error("Share verification failed:", error)
-          }
-        }, 1000)
+        if (result.success && result.id) {
+          const shareId = result.id
+          
+          // Immediate verification
+          setTimeout(async () => {
+            try {
+              const { testShareExists } = await import("../actions/share")
+              await testShareExists(shareId)
+            } catch (error) {
+              console.error("Share verification failed:", error)
+            }
+          }, 1000)
 
-        // Include encryption key in URL fragment (never sent to server)
-        const shareUrl = `${window.location.origin}/view/${shareId}#${keyString}`
-        setShareLink(shareUrl)
-      } else {
-        setError(result.error || "Failed to create secure share")
+          // Include encryption key in URL fragment (same key for all)
+          const shareUrl = `${window.location.origin}/view/${shareId}#${keyString}`
+          
+          links.push({
+            recipientId: recipient.id,
+            recipientName: recipient.name,
+            shareId,
+            shareLink: shareUrl,
+            expirationTime: recipient.expirationTime,
+            maxViews: recipient.maxViews,
+            requirePassword: recipient.requirePassword,
+          })
+        } else {
+          setError(result.error || `Failed to create secure share for ${recipient.name}`)
+          return
+        }
       }
+
+      setGeneratedLinks(links)
     } catch (error) {
       console.error("Failed to create secure share:", error)
       setError("Failed to create secure share. Please try again.")
@@ -107,22 +206,31 @@ export default function CreatePage() {
     }
   }
 
-  const copyToClipboard = async () => {
-    await navigator.clipboard.writeText(shareLink)
-    setCopied(true)
-    setTimeout(() => setCopied(false), 2000)
+  const copyToClipboard = async (link: string, linkId: string) => {
+    await navigator.clipboard.writeText(link)
+    setCopiedLinkId(linkId)
+    setTimeout(() => setCopiedLinkId(null), 2000)
   }
 
-  const generateSecurePassword = () => {
-    if (!isClient) return
-    const password = SecureCrypto.generateSecurePassword()
-    setFormData({ ...formData, password })
+  const openQrModal = (link: string, title: string) => {
+    setQrModalLink(link)
+    setQrModalTitle(title)
+    setIsQrModalOpen(true)
   }
 
-  if (shareLink) {
+  const addTag = (tag: string) => {
+    if (tags.length >= 3) return
+    setTags([...tags, tag])
+  }
+
+  const removeTag = (tag: string) => {
+    setTags(tags.filter(t => t !== tag))
+  }
+
+  if (generatedLinks.length > 0) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 p-4">
-        <div className="container mx-auto max-w-2xl py-16">
+      <div className="min-h-screen p-4">
+        <div className="container mx-auto max-w-4xl py-16">
           <Card>
             <CardHeader className="text-center">
               <div className="flex justify-center mb-4">
@@ -130,53 +238,117 @@ export default function CreatePage() {
                   <Shield className="w-8 h-8 text-green-600" />
                 </div>
               </div>
-              <CardTitle className="text-2xl">Secure Link Created!</CardTitle>
-              <CardDescription>Your secret has been encrypted client-side and is ready to share</CardDescription>
+              <CardTitle className="text-2xl">
+                {formData.multiRecipient ? `${generatedLinks.length} Secure Links Created!` : 'Secure Link Created!'}
+              </CardTitle>
+              <CardDescription>
+                Your secret has been encrypted client-side and is ready to share with {formData.multiRecipient ? 'multiple recipients' : 'your recipient'}
+              </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
-              <div>
-                <Label htmlFor="share-link">Secure Share Link</Label>
-                <div className="flex gap-2 mt-2">
-                  <Input id="share-link" value={shareLink} readOnly className="font-mono text-sm" />
-                  <Button onClick={copyToClipboard} variant="outline">
-                    <Copy className="w-4 h-4" />
-                  </Button>
-                  <Button onClick={() => setIsQrModalOpen(true)} variant="outline">
-                    <QrCode className="w-4 h-4" />
-                  </Button>
+              {formData.multiRecipient ? (
+                <div className="space-y-4">
+                  <h3 className="text-lg font-semibold flex items-center gap-2">
+                    <Users className="w-5 h-5" />
+                    Recipient Links
+                  </h3>
+                  {generatedLinks.map((link) => (
+                    <Card key={link.recipientId} className="border-l-4 border-l-blue-500">
+                      <CardHeader className="pb-3">
+                        <CardTitle className="text-base flex items-center gap-2">
+                          <User className="w-4 h-4" />
+                          {link.recipientName}
+                        </CardTitle>
+                        <CardDescription className="text-sm">
+                          Expires: {link.expirationTime} • Max views: {link.maxViews}
+                          {link.requirePassword && ' • Password protected'}
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent className="pt-0">
+                        <div className="flex gap-2">
+                          <Input 
+                            value={link.shareLink} 
+                            readOnly 
+                            className="font-mono text-xs" 
+                          />
+                          <Button 
+                            onClick={() => copyToClipboard(link.shareLink, link.recipientId)} 
+                            variant="outline"
+                            size="sm"
+                          >
+                            <Copy className="w-4 h-4" />
+                          </Button>
+                          <Button 
+                            onClick={() => openQrModal(link.shareLink, `${formData.title} - ${link.recipientName}`)} 
+                            variant="outline"
+                            size="sm"
+                          >
+                            <QrCode className="w-4 h-4" />
+                          </Button>
+                        </div>
+                        {copiedLinkId === link.recipientId && (
+                          <p className="text-sm text-green-600 mt-1">Copied to clipboard!</p>
+                        )}
+                      </CardContent>
+                    </Card>
+                  ))}
                 </div>
-                {copied && <p className="text-sm text-green-600 mt-1">Copied to clipboard!</p>}
-              </div>
+              ) : (
+                <div>
+                  <Label htmlFor="share-link">Secure Share Link</Label>
+                  <div className="flex gap-2 mt-2">
+                    <Input 
+                      id="share-link" 
+                      value={generatedLinks[0].shareLink} 
+                      readOnly 
+                      className="font-mono text-sm" 
+                    />
+                    <Button onClick={() => copyToClipboard(generatedLinks[0].shareLink, generatedLinks[0].recipientId)} variant="outline">
+                      <Copy className="w-4 h-4" />
+                    </Button>
+                    <Button onClick={() => openQrModal(generatedLinks[0].shareLink, formData.title)} variant="outline">
+                      <QrCode className="w-4 h-4" />
+                    </Button>
+                  </div>
+                  {copiedLinkId === generatedLinks[0].recipientId && (
+                    <p className="text-sm text-green-600 mt-1">Copied to clipboard!</p>
+                  )}
+                </div>
+              )}
 
               <Alert>
                 <Key className="w-4 h-4" />
                 <AlertDescription>
                   <strong>Security Notice:</strong> The decryption key is included in the URL fragment (#) and never
-                  sent to our servers. Only share this complete link with your intended recipient.
+                  sent to our servers. Only share each complete link with its intended recipient.
                 </AlertDescription>
               </Alert>
 
               <Alert>
                 <Shield className="w-4 h-4" />
                 <AlertDescription>
-                  <strong>Important:</strong> This link will expire based on your settings. Your data is encrypted with
-                  AES-256 and can only be decrypted by someone with this complete link.
+                  <strong>Important:</strong> Each link will expire based on its individual settings. Your data is encrypted with
+                  AES-256 and can only be decrypted by someone with the complete link.
                 </AlertDescription>
               </Alert>
 
               <div className="flex gap-4">
                 <Button
                   onClick={() => {
-                    setShareLink("")
+                    setGeneratedLinks([])
                     setFormData({
                       title: "",
                       content: "",
+                      linkType: "standard",
+                      multiRecipient: false,
+                    })
+                    setSingleRecipientSettings({
                       expirationTime: "1h",
                       maxViews: 1,
                       requirePassword: false,
                       password: "",
-                      linkType: "standard",
                     })
+                    setRecipients([])
                   }}
                   className="flex-1"
                 >
@@ -194,8 +366,8 @@ export default function CreatePage() {
           <QrCodeModal
             isOpen={isQrModalOpen}
             onClose={() => setIsQrModalOpen(false)}
-            url={shareLink}
-            title={formData.title}
+            url={qrModalLink}
+            title={qrModalTitle}
           />
         </div>
       </div>
@@ -204,9 +376,9 @@ export default function CreatePage() {
 
   if (!isClient) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <div className="animate-spin rounded-full h-8 w-8 mx-auto mb-4"></div>
           <p>Loading secure encryption...</p>
         </div>
       </div>
@@ -214,7 +386,7 @@ export default function CreatePage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 p-4">
+    <div className="min-h-screen p-4">
       <div className="container mx-auto max-w-2xl py-8">
         <div className="mb-6">
           <Link href="/">
@@ -242,6 +414,7 @@ export default function CreatePage() {
                   <AlertDescription>{error}</AlertDescription>
                 </Alert>
               )}
+              
               <div>
                 <Label htmlFor="title">Title (Optional)</Label>
                 <Input
@@ -270,112 +443,288 @@ export default function CreatePage() {
                 </InlineTip>
               </div>
 
-              <div>
-                <Label className="text-base font-medium">Link Type</Label>
-                <RadioGroup
-                  value={formData.linkType}
-                  onValueChange={(value) => setFormData({ ...formData, linkType: value })}
-                  className="mt-2"
-                >
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="standard" id="standard" />
-                    <Label htmlFor="standard" className="flex items-center gap-2 cursor-pointer">
-                      <Link2 className="w-4 h-4" />
-                      Standard links (more secure)
-                    </Label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="shorter" id="shorter" />
-                    <Label htmlFor="shorter" className="flex items-center gap-2 cursor-pointer">
-                      <Link2 className="w-4 h-4" />
-                      Shorter links (easier to share)
-                    </Label>
-                  </div>
-                </RadioGroup>
-                <p className="text-sm text-gray-600 mt-1">
-                  {formData.linkType === "standard" 
-                    ? "Standard links use longer, more secure identifiers for maximum security."
-                    : "Shorter links are easier to share but use shorter identifiers (still cryptographically secure)."}
-                </p>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="expiration">Expiration Time</Label>
-                  <Select
-                    value={formData.expirationTime}
-                    onValueChange={(value) => setFormData({ ...formData, expirationTime: value })}
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="15m">15 minutes</SelectItem>
-                      <SelectItem value="1h">1 hour</SelectItem>
-                      <SelectItem value="24h">24 hours</SelectItem>
-                      <SelectItem value="7d">7 days</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div>
-                  <Label htmlFor="maxViews">Max Views</Label>
-                  <Select
-                    value={formData.maxViews.toString()}
-                    onValueChange={(value) => setFormData({ ...formData, maxViews: Number.parseInt(value) })}
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="1">1 view (burn after reading)</SelectItem>
-                      <SelectItem value="3">3 views</SelectItem>
-                      <SelectItem value="5">5 views</SelectItem>
-                      <SelectItem value="10">10 views</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-
-              <InlineTip className="mt-4">
-                <strong>Security strategy:</strong> Use shorter expiration times (15 minutes) for passwords and longer periods for less sensitive information like usernames or server names.
-              </InlineTip>
-
+              {/* Multi-Recipient Toggle */}
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <Label htmlFor="requirePassword">Require Password</Label>
-                    <p className="text-sm text-gray-600">Add an extra layer of security</p>
+                    <div className="flex items-center gap-2">
+                      <Label htmlFor="multiRecipient">Multi-Recipient Sharing</Label>
+                      <Badge variant="outline" className="text-xs px-2 py-1">
+                        NEW
+                      </Badge>
+                    </div>
+                    <p className="text-sm text-gray-600">Encrypt once, generate multiple links for different recipients (max 3)</p>
                   </div>
                   <Switch
-                    id="requirePassword"
-                    checked={formData.requirePassword}
-                    onCheckedChange={(checked) => setFormData({ ...formData, requirePassword: checked })}
+                    id="multiRecipient"
+                    checked={formData.multiRecipient}
+                    onCheckedChange={(checked) => setFormData({ ...formData, multiRecipient: checked })}
                   />
                 </div>
 
-                {formData.requirePassword && (
-                  <div>
-                    <Label htmlFor="password">Access Password</Label>
-                    <div className="flex gap-2 mt-1">
-                      <PasswordInput
-                        id="password"
-                        placeholder="Enter a password to protect this secret"
-                        value={formData.password}
-                        onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                        required={formData.requirePassword}
-                        className="flex-1"
-                      />
-                      <Button type="button" variant="outline" onClick={generateSecurePassword}>
-                        <RefreshCw className="w-4 h-4" />
-                      </Button>
-                    </div>
-                    <p className="text-sm text-gray-600 mt-1">
-                      Click the refresh button to generate a secure random password. Use the eye icon to view the password.
-                    </p>
-                  </div>
+                {formData.multiRecipient && (
+                  <Alert>
+                    <Users className="w-4 h-4" />
+                    <AlertDescription>
+                      <strong>Multi-Recipient Mode:</strong> Your content will be encrypted once, but each recipient will get their own unique link with individual expiration and access settings.
+                    </AlertDescription>
+                  </Alert>
                 )}
               </div>
+
+              {/* Recipient Management */}
+              {formData.multiRecipient && (
+                <div className="space-y-4">
+                  <div>
+                    <Label className="text-base font-medium">Recipients</Label>
+                    <div className="flex gap-2 mt-2">
+                      <Input
+                        placeholder="Recipient name (e.g., John, Marketing Team)"
+                        value={newRecipientName}
+                        onChange={(e) => setNewRecipientName(e.target.value)}
+                        onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addRecipient())}
+                      />
+                      <Button type="button" onClick={addRecipient} variant="outline">
+                        <Plus className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  </div>
+
+                  {recipients.length > 0 && (
+                    <div className="space-y-3">
+                      {recipients.map((recipient) => (
+                        <Card key={recipient.id} className="border-l-4 border-l-blue-500">
+                          <CardContent className="pt-4">
+                            <div className="flex items-center justify-between mb-3">
+                              <h4 className="font-medium flex items-center gap-2">
+                                <User className="w-4 h-4" />
+                                {recipient.name}
+                              </h4>
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => removeRecipient(recipient.id)}
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </Button>
+                            </div>
+                            
+                            <div className="grid grid-cols-2 gap-3 mb-3">
+                              <div>
+                                <Label className="text-sm">Expiration</Label>
+                                <Select
+                                  value={recipient.expirationTime}
+                                  onValueChange={(value) => updateRecipient(recipient.id, { expirationTime: value })}
+                                >
+                                  <SelectTrigger className="h-8">
+                                    <SelectValue />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    <SelectItem value="15m">15 minutes</SelectItem>
+                                    <SelectItem value="1h">1 hour</SelectItem>
+                                    <SelectItem value="24h">24 hours</SelectItem>
+                                    <SelectItem value="7d">7 days</SelectItem>
+                                  </SelectContent>
+                                </Select>
+                              </div>
+                              
+                              <div>
+                                <Label className="text-sm">Max Views</Label>
+                                <Select
+                                  value={recipient.maxViews.toString()}
+                                  onValueChange={(value) => updateRecipient(recipient.id, { maxViews: parseInt(value) })}
+                                >
+                                  <SelectTrigger className="h-8">
+                                    <SelectValue />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    <SelectItem value="1">1 view</SelectItem>
+                                    <SelectItem value="3">3 views</SelectItem>
+                                    <SelectItem value="5">5 views</SelectItem>
+                                    <SelectItem value="10">10 views</SelectItem>
+                                  </SelectContent>
+                                </Select>
+                              </div>
+                            </div>
+
+                            <div className="flex items-center justify-between mb-2">
+                              <Label className="text-sm">Require Password</Label>
+                              <Switch
+                                checked={recipient.requirePassword}
+                                onCheckedChange={(checked) => updateRecipient(recipient.id, { requirePassword: checked })}
+                              />
+                            </div>
+
+                            {recipient.requirePassword && (
+                              <div className="flex gap-2">
+                                <PasswordInput
+                                  placeholder="Password for this recipient"
+                                  value={recipient.password}
+                                  onChange={(e) => updateRecipient(recipient.id, { password: e.target.value })}
+                                  className="flex-1 h-8"
+                                />
+                                <Button 
+                                  type="button" 
+                                  variant="outline" 
+                                  size="sm"
+                                  onClick={() => generateSecurePassword(recipient.id)}
+                                >
+                                  <RefreshCw className="w-4 h-4" />
+                                </Button>
+                              </div>
+                            )}
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Single Recipient Settings */}
+              {!formData.multiRecipient && (
+                <>
+                  <div>
+                    <Label className="text-base font-medium">Link Type</Label>
+                    <RadioGroup
+                      value={formData.linkType}
+                      onValueChange={(value) => setFormData({ ...formData, linkType: value })}
+                      className="mt-2"
+                    >
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="standard" id="standard" />
+                        <Label htmlFor="standard" className="flex items-center gap-2 cursor-pointer">
+                          <Link2 className="w-4 h-4" />
+                          Standard links (more secure)
+                        </Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="shorter" id="shorter" />
+                        <Label htmlFor="shorter" className="flex items-center gap-2 cursor-pointer">
+                          <Link2 className="w-4 h-4" />
+                          Shorter links (easier to share)
+                        </Label>
+                      </div>
+                    </RadioGroup>
+                    <p className="text-sm text-gray-600 mt-1">
+                      {formData.linkType === "standard" 
+                        ? "Standard links use longer, more secure identifiers for maximum security."
+                        : "Shorter links are easier to share but use shorter identifiers (still cryptographically secure)."}
+                    </p>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="expiration">Expiration Time</Label>
+                      <Select
+                        value={singleRecipientSettings.expirationTime}
+                        onValueChange={(value) => setSingleRecipientSettings({ ...singleRecipientSettings, expirationTime: value })}
+                      >
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="15m">15 minutes</SelectItem>
+                          <SelectItem value="1h">1 hour</SelectItem>
+                          <SelectItem value="24h">24 hours</SelectItem>
+                          <SelectItem value="7d">7 days</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div>
+                      <Label htmlFor="maxViews">Max Views</Label>
+                      <Select
+                        value={singleRecipientSettings.maxViews.toString()}
+                        onValueChange={(value) => setSingleRecipientSettings({ ...singleRecipientSettings, maxViews: parseInt(value) })}
+                      >
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="1">1 view (burn after reading)</SelectItem>
+                          <SelectItem value="3">3 views</SelectItem>
+                          <SelectItem value="5">5 views</SelectItem>
+                          <SelectItem value="10">10 views</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+
+                  <InlineTip className="mt-4">
+                    <strong>Security strategy:</strong> Use shorter expiration times (15 minutes) for passwords and longer periods for less sensitive information like usernames or server names.
+                  </InlineTip>
+
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <Label htmlFor="requirePassword">Require Password</Label>
+                        <p className="text-sm text-gray-600">Add an extra layer of security</p>
+                      </div>
+                      <Switch
+                        id="requirePassword"
+                        checked={singleRecipientSettings.requirePassword}
+                        onCheckedChange={(checked) => setSingleRecipientSettings({ ...singleRecipientSettings, requirePassword: checked })}
+                      />
+                    </div>
+
+                    {singleRecipientSettings.requirePassword && (
+                      <div>
+                        <Label htmlFor="password">Access Password</Label>
+                        <div className="flex gap-2 mt-1">
+                          <PasswordInput
+                            id="password"
+                            placeholder="Enter a password to protect this secret"
+                            value={singleRecipientSettings.password}
+                            onChange={(e) => setSingleRecipientSettings({ ...singleRecipientSettings, password: e.target.value })}
+                            required={singleRecipientSettings.requirePassword}
+                            className="flex-1"
+                          />
+                          <Button type="button" variant="outline" onClick={() => generateSecurePassword()}>
+                            <RefreshCw className="w-4 h-4" />
+                          </Button>
+                        </div>
+                        <p className="text-sm text-gray-600 mt-1">
+                          Click the refresh button to generate a secure random password. Use the eye icon to view the password.
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                </>
+              )}
+
+              {/* Link Type for Multi-Recipient */}
+              {formData.multiRecipient && (
+                <div>
+                  <Label className="text-base font-medium">Link Type</Label>
+                  <RadioGroup
+                    value={formData.linkType}
+                    onValueChange={(value) => setFormData({ ...formData, linkType: value })}
+                    className="mt-2"
+                  >
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="standard" id="standard-multi" />
+                      <Label htmlFor="standard-multi" className="flex items-center gap-2 cursor-pointer">
+                        <Link2 className="w-4 h-4" />
+                        Standard links (more secure)
+                      </Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="shorter" id="shorter-multi" />
+                      <Label htmlFor="shorter-multi" className="flex items-center gap-2 cursor-pointer">
+                        <Link2 className="w-4 h-4" />
+                        Shorter links (easier to share)
+                      </Label>
+                    </div>
+                  </RadioGroup>
+                  <p className="text-sm text-gray-600 mt-1">
+                    {formData.linkType === "standard" 
+                      ? "Standard links use longer, more secure identifiers for maximum security."
+                      : "Shorter links are easier to share but use shorter identifiers (still cryptographically secure)."}
+                  </p>
+                </div>
+              )}
 
               <Alert>
                 <Key className="w-4 h-4" />
@@ -386,7 +735,7 @@ export default function CreatePage() {
               </Alert>
 
               <Button type="submit" className="w-full" disabled={isLoading}>
-                {isLoading ? "Creating Secure Link..." : "Create Secure Link"}
+                {isLoading ? "Creating Secure Links..." : formData.multiRecipient ? "Create Secure Links" : "Create Secure Link"}
               </Button>
             </form>
           </CardContent>

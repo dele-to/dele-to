@@ -117,6 +117,13 @@ export default function ViewPage({ params }: { params: { id: string } }) {
         try {
           const key = await SecureCrypto.importKey(keyFromUrl)
           setEncryptionKey(key)
+
+          // *** VULNERABILITY FIX ***
+          // After storing the key, remove it from the URL to prevent it from being
+          // included in the Next.js router state and sent to the server.
+          const urlWithoutHash = window.location.pathname + window.location.search
+          window.history.replaceState({}, document.title, urlWithoutHash)
+          
         } catch (error) {
           setError("Invalid or corrupted encryption key in URL")
         }
@@ -193,7 +200,7 @@ export default function ViewPage({ params }: { params: { id: string } }) {
 
   if (!isClient) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
           <p>Loading secure decryption...</p>
@@ -204,7 +211,7 @@ export default function ViewPage({ params }: { params: { id: string } }) {
 
   if (showContent && share) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 p-4">
+      <div className="min-h-screen p-4">
         <div className="container mx-auto max-w-2xl py-16">
           <Card>
             <CardHeader>
@@ -222,11 +229,11 @@ export default function ViewPage({ params }: { params: { id: string } }) {
               <div className="grid grid-cols-2 gap-4 text-sm">
                 <div className="flex items-center gap-2">
                   <Clock className="w-4 h-4 text-orange-500" />
-                  <span>{formatTimeRemaining(share.expiresAt)}</span>
+                  <span className="text-orange-600 dark:text-orange-400 font-medium">{formatTimeRemaining(share.expiresAt)}</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <Eye className="w-4 h-4 text-blue-500" />
-                  <span>
+                  <span className="text-blue-600 dark:text-blue-400 font-medium">
                     {share.currentViews}/{share.maxViews} views
                   </span>
                 </div>
@@ -234,9 +241,9 @@ export default function ViewPage({ params }: { params: { id: string } }) {
 
               <div>
                 <Label>Decrypted Content</Label>
-                <div className="mt-2 p-4 bg-gray-50 rounded-lg border">
+                <div className="mt-2 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg border dark:border-gray-700">
                   <div className="flex justify-between items-start gap-4">
-                    <pre className="whitespace-pre-wrap font-mono text-sm flex-1 break-all">{decryptedContent}</pre>
+                    <pre className="whitespace-pre-wrap font-mono text-sm flex-1 break-all text-gray-900 dark:text-gray-100">{decryptedContent}</pre>
                     <Button onClick={copyToClipboard} variant="outline" size="sm">
                       <Copy className="w-4 h-4" />
                     </Button>
@@ -274,7 +281,7 @@ export default function ViewPage({ params }: { params: { id: string } }) {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 p-4">
+    <div className="min-h-screen p-4">
       <div className="container mx-auto max-w-md py-16">
         <Card>
           <CardHeader className="text-center">
@@ -296,15 +303,15 @@ export default function ViewPage({ params }: { params: { id: string } }) {
             <AccessTips />
             
             {metadata && (
-              <div className="mb-6 p-4 bg-gray-50 rounded-lg">
+              <div className="mb-6 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg border dark:border-gray-700">
                 <div className="grid grid-cols-2 gap-4 text-sm">
                   <div className="flex items-center gap-2">
                     <Clock className="w-4 h-4 text-orange-500" />
-                    <span>{formatTimeRemaining(metadata.expiresAt)}</span>
+                    <span className="text-orange-600 dark:text-orange-400 font-medium">{formatTimeRemaining(metadata.expiresAt)}</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <Eye className="w-4 h-4 text-blue-500" />
-                    <span>
+                    <span className="text-blue-600 dark:text-blue-400 font-medium">
                       {metadata.currentViews}/{metadata.maxViews} views
                     </span>
                   </div>

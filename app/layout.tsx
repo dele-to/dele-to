@@ -2,6 +2,8 @@ import type { Metadata } from 'next'
 import { GeistSans } from 'geist/font/sans'
 import { GeistMono } from 'geist/font/mono'
 import { Footer } from '@/components/footer'
+import { ThemeProvider } from '@/components/theme-provider'
+import { ThemeToggle } from '@/components/theme-toggle'
 import { ConsoleMessage } from '@/components/console-message'
 import { PWAInstallPrompt } from '@/components/pwa-install-prompt'
 import './globals.css'
@@ -62,14 +64,23 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en" className={`${GeistSans.variable} ${GeistMono.variable}`}>
+    <html lang="en" suppressHydrationWarning>
       <head>
         <link rel="manifest" href="/manifest.json" />
       </head>
-      <body className={`min-h-screen flex flex-col ${GeistSans.className}`}>
-        <ConsoleMessage />
-        <main className="flex-1">{children}</main>
-        <Footer />
+      <body
+        className={`min-h-screen flex flex-col ${GeistSans.className} ${GeistSans.variable} ${GeistMono.variable}`}
+      >
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <ConsoleMessage />
+          <main className="flex-1">{children}</main>
+          <Footer />
+        </ThemeProvider>
         <PWAInstallPrompt />
       </body>
     </html>
