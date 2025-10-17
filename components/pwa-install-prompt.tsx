@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Smartphone, Share } from 'lucide-react'
+import { Smartphone, Share, X } from 'lucide-react'
 
 interface BeforeInstallPromptEvent extends Event {
   readonly platforms: string[]
@@ -10,6 +10,13 @@ interface BeforeInstallPromptEvent extends Event {
     platform: string
   }>
   prompt(): Promise<void>
+}
+
+// Extend Navigator interface to include standalone property for iOS PWA detection
+declare global {
+  interface Navigator {
+    standalone?: boolean
+  }
 }
 
 export function PWAInstallPrompt() {
@@ -73,6 +80,12 @@ export function PWAInstallPrompt() {
     }
   }, [])
 
+  const handleDismiss = () => {
+    // Store dismissal timestamp in localStorage
+    localStorage.setItem('pwa-install-dismissed', Date.now().toString())
+    setShowPrompt(false)
+  }
+
   // Don't render if not mobile, already installed, or shouldn't show prompt
   if (!isMobile || isInstalled || !showPrompt) {
     return null
@@ -96,6 +109,13 @@ export function PWAInstallPrompt() {
               Add to your home screen for faster access and a better experience
             </p>
           </div>
+          <button
+            onClick={handleDismiss}
+            className="flex-shrink-0 p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+            aria-label="Close install prompt"
+          >
+            <X className="h-5 w-5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300" />
+          </button>
         </div>
         
         <div className="space-y-3">
