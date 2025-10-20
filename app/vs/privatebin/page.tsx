@@ -1,102 +1,96 @@
+"use client"
+
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Check, X, Flame, ArrowLeft, Shield, Lock, Code } from "lucide-react"
 import Link from "next/link"
-import type { Metadata } from 'next'
+import { useTranslation } from "react-i18next"
 
-export const metadata: Metadata = {
-  title: 'DELE.TO - Alternative to PrivateBin',
-  description: 'DELE.TO offers modern zero-knowledge security as an alternative to PrivateBin. Compare client-side encryption, password protection, and user experience.',
-  openGraph: {
-    title: 'DELE.TO - Alternative to PrivateBin',
-    description: 'Modern alternative to PrivateBin with zero-knowledge encryption, password protection, and superior user experience.',
-    images: ['/SEO.png'],
-  },
-}
+export default function PrivateBinComparison() {
+  const { t } = useTranslation()
 
-const comparisonData = [
-  {
-    feature: "Client-Side Encryption",
+  const getComparisonData = () => [
+    {
+      feature: t('vs.common.clientSideEncryption'),
     deleto: true,
     privatebin: true,
     details: "Both use AES-256 encryption in the browser"
   },
   {
-    feature: "Zero-Knowledge Architecture",
+    feature: t('vs.common.zeroKnowledgeArchitecture'),
     deleto: true,
     privatebin: true,
     details: "Neither service can access your data"
   },
   {
-    feature: "Custom Expiration Times",
+    feature: t('vs.common.customExpirationTimes'),
     deleto: true,
     privatebin: true,
     details: "Both offer flexible expiration settings"
   },
   {
-    feature: "View Count Limits",
+    feature: t('vs.common.viewCountLimits'),
     deleto: true,
     privatebin: true,
-    details: "Burn-after-reading functionality in both"
+    details: "Burn-after-reading functionality"
   },
   {
-    feature: "Password Protection",
+    feature: t('vs.common.passwordProtection'),
     deleto: true,
     privatebin: true,
     details: "Both offer optional password protection"
   },
   {
-    feature: "Modern UI/UX",
+    feature: t('vs.common.modernUiUx'),
     deleto: true,
     privatebin: false,
-    details: "DELE.TO has more modern, polished interface"
+    details: "DELE.TO has more polished interface"
   },
   {
-    feature: "Mobile Responsive",
+    feature: t('vs.common.mobileOptimized'),
     deleto: true,
     privatebin: "partial",
     details: "DELE.TO fully optimized for mobile"
   },
   {
-    feature: "File Sharing",
+    feature: t('vs.common.fileSharing'),
     deleto: "coming-soon",
     privatebin: true,
     details: "PrivateBin supports file uploads, DELE.TO coming soon"
   },
   {
-    feature: "Syntax Highlighting",
-    deleto: false,
-    privatebin: true,
-    details: "PrivateBin offers code syntax highlighting"
-  },
-  {
-    feature: "Self-Hosted Option",
+    feature: t('vs.common.selfHosted'),
     deleto: true,
     privatebin: true,
-    details: "PrivateBin available now, DELE.TO coming soon"
+    details: "Both offer self-hosting capabilities"
   },
   {
-    feature: "Open Source",
+    feature: t('vs.common.openSource'),
     deleto: true,
     privatebin: true,
     details: "Both are open source projects"
   },
   {
-    feature: "Multi-Recipient Sharing",
+    feature: t('vs.common.multiRecipientSharing'),
     deleto: true,
     privatebin: false,
     details: "DELE.TO supports sharing to multiple recipients"
   },
   {
-    feature: "Discussion Feature",
+    feature: t('vs.common.syntaxHighlighting'),
+    deleto: false,
+    privatebin: true,
+    details: "PrivateBin offers code syntax highlighting"
+  },
+  {
+    feature: t('vs.common.discussionFeature'),
     deleto: false,
     privatebin: true,
     details: "PrivateBin allows comments on pastes"
   }
-]
+  ]
 
-export default function PrivateBinComparison() {
   return (
     <div className="min-h-screen">
       <div className="container mx-auto px-4 py-8">
@@ -227,7 +221,7 @@ export default function PrivateBinComparison() {
                     </tr>
                   </thead>
                   <tbody>
-                    {comparisonData.map((item, index) => (
+                    {getComparisonData().map((item: any, index: number) => (
                       <tr key={index} className="border-b hover:bg-gray-50 dark:hover:bg-gray-800">
                         <td className="py-3 px-4 font-medium">{item.feature}</td>
                         <td className="py-3 px-4 text-center">

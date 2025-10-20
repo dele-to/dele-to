@@ -3,6 +3,7 @@
 import type React from "react"
 
 import { useState, useEffect } from "react"
+import { useTranslation } from "react-i18next"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -17,7 +18,7 @@ import { Copy, Shield, ArrowLeft, Key, RefreshCw, AlertTriangle, Link2, QrCode, 
 import Link from "next/link"
 import { createSecureShare } from "../actions/share"
 import { SecureCrypto } from "../../lib/crypto"
-import { SecurityTips } from "@/components/security-tips"
+import { SecurityTips } from "@/components/security-tips-i18n"
 import { InlineTip } from "@/components/inline-tip"
 import { PasswordInput } from "@/components/password-input"
 import { QrCodeModal } from "@/components/qr-code-modal"
@@ -42,6 +43,7 @@ interface GeneratedLink {
 }
 
 export default function CreatePage() {
+  const { t } = useTranslation();
   const [formData, setFormData] = useState({
     title: "",
     content: "",
@@ -239,10 +241,10 @@ export default function CreatePage() {
                 </div>
               </div>
               <CardTitle className="text-2xl">
-                {formData.multiRecipient ? `${generatedLinks.length} Secure Links Created!` : 'Secure Link Created!'}
+                {formData.multiRecipient ? `${generatedLinks.length} ${t('create.success.title')}` : t('create.success.title')}
               </CardTitle>
               <CardDescription>
-                Your secret has been encrypted client-side and is ready to share with {formData.multiRecipient ? 'multiple recipients' : 'your recipient'}
+                {t('create.success.description')}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
@@ -250,7 +252,7 @@ export default function CreatePage() {
                 <div className="space-y-4">
                   <h3 className="text-lg font-semibold flex items-center gap-2">
                     <Users className="w-5 h-5" />
-                    Recipient Links
+                    {t('create.success.multiRecipientTitle')}
                   </h3>
                   {generatedLinks.map((link) => (
                     <Card key={link.recipientId} className="border-l-4 border-l-blue-500">
@@ -260,8 +262,8 @@ export default function CreatePage() {
                           {link.recipientName}
                         </CardTitle>
                         <CardDescription className="text-sm">
-                          Expires: {link.expirationTime} • Max views: {link.maxViews}
-                          {link.requirePassword && ' • Password protected'}
+                          {t('create.success.expires')} {link.expirationTime} • {t('create.success.maxViews')} {link.maxViews}
+                          {link.requirePassword && ` • ${t('create.success.passwordProtected')}`}
                         </CardDescription>
                       </CardHeader>
                       <CardContent className="pt-0">
@@ -295,7 +297,7 @@ export default function CreatePage() {
                 </div>
               ) : (
                 <div>
-                  <Label htmlFor="share-link">Secure Share Link</Label>
+                  <Label htmlFor="share-link">{t('create.success.secureShareLink')}</Label>
                   <div className="flex gap-2 mt-2">
                     <Input 
                       id="share-link" 
@@ -319,16 +321,14 @@ export default function CreatePage() {
               <Alert>
                 <Key className="w-4 h-4" />
                 <AlertDescription>
-                  <strong>Security Notice:</strong> The decryption key is included in the URL fragment (#) and never
-                  sent to our servers. Only share each complete link with its intended recipient.
+                  <strong>{t('create.success.securityNotice')}</strong> {t('create.success.securityNoticeText')}
                 </AlertDescription>
               </Alert>
 
               <Alert>
                 <Shield className="w-4 h-4" />
                 <AlertDescription>
-                  <strong>Important:</strong> Each link will expire based on its individual settings. Your data is encrypted with
-                  AES-256 and can only be decrypted by someone with the complete link.
+                  <strong>{t('create.success.importantNotice')}</strong> {t('create.success.importantNoticeText')}
                 </AlertDescription>
               </Alert>
 
@@ -352,12 +352,12 @@ export default function CreatePage() {
                   }}
                   className="flex-1"
                 >
-                  Create Another
+                  {t('create.form.submitButton')}
                 </Button>
                 <Link href="/" className="flex-1">
                   <Button variant="outline" className="w-full bg-transparent">
                     <ArrowLeft className="w-4 h-4 mr-2" />
-                    Home
+                    {t('navigation.home')}
                   </Button>
                 </Link>
               </div>
@@ -379,7 +379,7 @@ export default function CreatePage() {
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-8 w-8 mx-auto mb-4"></div>
-          <p>Loading secure encryption...</p>
+          <p>{t('common.loading')}</p>
         </div>
       </div>
     )
@@ -392,7 +392,7 @@ export default function CreatePage() {
           <Link href="/">
             <Button variant="ghost">
               <ArrowLeft className="w-4 h-4 mr-2" />
-              Back to Home
+              {t('common.back')}
             </Button>
           </Link>
         </div>
@@ -401,9 +401,9 @@ export default function CreatePage() {
         
         <Card>
           <CardHeader>
-            <CardTitle>Create Secure Share</CardTitle>
+            <CardTitle>{t('create.title')}</CardTitle>
             <CardDescription>
-              Encrypt and share sensitive information with client-side AES-256 encryption
+              {t('create.subtitle')}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -416,30 +416,30 @@ export default function CreatePage() {
               )}
               
               <div>
-                <Label htmlFor="title">Title (Optional)</Label>
+                <Label htmlFor="title">{t('create.form.secretLabel')} ({t('common.optional')})</Label>
                 <Input
                   id="title"
-                  placeholder="e.g., Database Password, API Key"
+                  placeholder={t('create.form.secretPlaceholder')}
                   value={formData.title}
                   onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                 />
               </div>
 
               <div>
-                <Label htmlFor="content">Secret Content *</Label>
+                <Label htmlFor="content">{t('create.form.secretLabel')} *</Label>
                 <Textarea
                   id="content"
-                  placeholder="Enter your password, API key, or sensitive information here..."
+                  placeholder={t('create.form.secretPlaceholder')}
                   value={formData.content}
                   onChange={(e) => setFormData({ ...formData, content: e.target.value })}
                   required
                   rows={4}
                 />
                 <p className="text-sm text-gray-600 mt-1">
-                  This content will be encrypted with AES-256 in your browser before transmission.
+                  {t('create.subtitle')}
                 </p>
                 <InlineTip className="mt-3">
-                  <strong>Pro tip:</strong> For login credentials, consider sharing the username, password, and server details in separate links for enhanced security isolation.
+                  <strong>{t('create.form.proTip')}</strong> {t('create.form.proTipContent')}
                 </InlineTip>
               </div>
 
@@ -448,12 +448,12 @@ export default function CreatePage() {
                 <div className="flex items-center justify-between">
                   <div>
                     <div className="flex items-center gap-2">
-                      <Label htmlFor="multiRecipient">Multi-Recipient Sharing</Label>
+                      <Label htmlFor="multiRecipient">{t('create.multiRecipient.toggle')}</Label>
                       <Badge variant="outline" className="text-xs px-2 py-1">
-                        NEW
+                        {t('common.new')}
                       </Badge>
                     </div>
-                    <p className="text-sm text-gray-600">Encrypt once, generate multiple links for different recipients (max 3)</p>
+                    <p className="text-sm text-gray-600">{t('create.multiRecipient.description')}</p>
                   </div>
                   <Switch
                     id="multiRecipient"
@@ -466,7 +466,7 @@ export default function CreatePage() {
                   <Alert>
                     <Users className="w-4 h-4" />
                     <AlertDescription>
-                      <strong>Multi-Recipient Mode:</strong> Your content will be encrypted once, but each recipient will get their own unique link with individual expiration and access settings.
+                      <strong>{t('create.multiRecipient.toggle')}:</strong> {t('create.multiRecipient.modeDescription')}
                     </AlertDescription>
                   </Alert>
                 )}
@@ -476,10 +476,10 @@ export default function CreatePage() {
               {formData.multiRecipient && (
                 <div className="space-y-4">
                   <div>
-                    <Label className="text-base font-medium">Recipients</Label>
+                    <Label className="text-base font-medium">{t('create.multiRecipient.recipientsLabel')}</Label>
                     <div className="flex gap-2 mt-2">
                       <Input
-                        placeholder="Recipient name (e.g., John, Marketing Team)"
+                        placeholder={t('create.multiRecipient.recipientPlaceholder')}
                         value={newRecipientName}
                         onChange={(e) => setNewRecipientName(e.target.value)}
                         onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addRecipient())}
@@ -521,16 +521,16 @@ export default function CreatePage() {
                                     <SelectValue />
                                   </SelectTrigger>
                                   <SelectContent>
-                                    <SelectItem value="15m">15 minutes</SelectItem>
-                                    <SelectItem value="1h">1 hour</SelectItem>
-                                    <SelectItem value="24h">24 hours</SelectItem>
-                                    <SelectItem value="7d">7 days</SelectItem>
+                                    <SelectItem value="15m">{t('create.expiration.minutes_15')}</SelectItem>
+                                    <SelectItem value="1h">{t('create.expiration.hours_1')}</SelectItem>
+                                    <SelectItem value="24h">{t('create.expiration.hours_24')}</SelectItem>
+                                    <SelectItem value="7d">{t('create.expiration.days_7')}</SelectItem>
                                   </SelectContent>
                                 </Select>
                               </div>
                               
                               <div>
-                                <Label className="text-sm">Max Views</Label>
+                                <Label className="text-sm">{t('create.form.maxViewsLabel')}</Label>
                                 <Select
                                   value={recipient.maxViews.toString()}
                                   onValueChange={(value) => updateRecipient(recipient.id, { maxViews: parseInt(value) })}
@@ -539,17 +539,17 @@ export default function CreatePage() {
                                     <SelectValue />
                                   </SelectTrigger>
                                   <SelectContent>
-                                    <SelectItem value="1">1 view</SelectItem>
-                                    <SelectItem value="3">3 views</SelectItem>
-                                    <SelectItem value="5">5 views</SelectItem>
-                                    <SelectItem value="10">10 views</SelectItem>
+                                    <SelectItem value="1">{t('create.maxViews.view1')}</SelectItem>
+                                    <SelectItem value="3">{t('create.maxViews.views3')}</SelectItem>
+                                    <SelectItem value="5">{t('create.maxViews.views5')}</SelectItem>
+                                    <SelectItem value="10">{t('create.maxViews.views10')}</SelectItem>
                                   </SelectContent>
                                 </Select>
                               </div>
                             </div>
 
                             <div className="flex items-center justify-between mb-2">
-                              <Label className="text-sm">Require Password</Label>
+                              <Label className="text-sm">{t('create.form.requirePassword')}</Label>
                               <Switch
                                 checked={recipient.requirePassword}
                                 onCheckedChange={(checked) => updateRecipient(recipient.id, { requirePassword: checked })}
@@ -559,7 +559,7 @@ export default function CreatePage() {
                             {recipient.requirePassword && (
                               <div className="flex gap-2">
                                 <PasswordInput
-                                  placeholder="Password for this recipient"
+                                  placeholder={t('create.form.passwordForRecipient')}
                                   value={recipient.password}
                                   onChange={(e) => updateRecipient(recipient.id, { password: e.target.value })}
                                   className="flex-1 h-8"
@@ -586,7 +586,7 @@ export default function CreatePage() {
               {!formData.multiRecipient && (
                 <>
                   <div>
-                    <Label className="text-base font-medium">Link Type</Label>
+                    <Label className="text-base font-medium">{t('create.form.linkTypeLabel')}</Label>
                     <RadioGroup
                       value={formData.linkType}
                       onValueChange={(value) => setFormData({ ...formData, linkType: value })}
@@ -596,27 +596,27 @@ export default function CreatePage() {
                         <RadioGroupItem value="standard" id="standard" />
                         <Label htmlFor="standard" className="flex items-center gap-2 cursor-pointer">
                           <Link2 className="w-4 h-4" />
-                          Standard links (more secure)
+                          {t('create.form.linkTypeStandardLabel')}
                         </Label>
                       </div>
                       <div className="flex items-center space-x-2">
                         <RadioGroupItem value="shorter" id="shorter" />
                         <Label htmlFor="shorter" className="flex items-center gap-2 cursor-pointer">
                           <Link2 className="w-4 h-4" />
-                          Shorter links (easier to share)
+                          {t('create.form.linkTypeShorterLabel')}
                         </Label>
                       </div>
                     </RadioGroup>
                     <p className="text-sm text-gray-600 mt-1">
                       {formData.linkType === "standard" 
-                        ? "Standard links use longer, more secure identifiers for maximum security."
-                        : "Shorter links are easier to share but use shorter identifiers (still cryptographically secure)."}
+                        ? t('create.form.linkTypeStandardDesc')
+                        : t('create.form.linkTypeShorterDesc')}
                     </p>
                   </div>
 
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <Label htmlFor="expiration">Expiration Time</Label>
+                      <Label htmlFor="expiration">{t('create.form.expirationLabel')}</Label>
                       <Select
                         value={singleRecipientSettings.expirationTime}
                         onValueChange={(value) => setSingleRecipientSettings({ ...singleRecipientSettings, expirationTime: value })}
@@ -625,16 +625,16 @@ export default function CreatePage() {
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="15m">15 minutes</SelectItem>
-                          <SelectItem value="1h">1 hour</SelectItem>
-                          <SelectItem value="24h">24 hours</SelectItem>
-                          <SelectItem value="7d">7 days</SelectItem>
+                          <SelectItem value="15m">{t('create.expiration.minutes_15')}</SelectItem>
+                          <SelectItem value="1h">{t('create.expiration.hours_1')}</SelectItem>
+                          <SelectItem value="24h">{t('create.expiration.hours_24')}</SelectItem>
+                          <SelectItem value="7d">{t('create.expiration.days_7')}</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
 
                     <div>
-                      <Label htmlFor="maxViews">Max Views</Label>
+                      <Label htmlFor="maxViews">{t('create.form.maxViewsLabel')}</Label>
                       <Select
                         value={singleRecipientSettings.maxViews.toString()}
                         onValueChange={(value) => setSingleRecipientSettings({ ...singleRecipientSettings, maxViews: parseInt(value) })}
@@ -643,24 +643,24 @@ export default function CreatePage() {
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="1">1 view (burn after reading)</SelectItem>
-                          <SelectItem value="3">3 views</SelectItem>
-                          <SelectItem value="5">5 views</SelectItem>
-                          <SelectItem value="10">10 views</SelectItem>
+                          <SelectItem value="1">{t('create.maxViews.view1')}</SelectItem>
+                          <SelectItem value="3">{t('create.maxViews.views3')}</SelectItem>
+                          <SelectItem value="5">{t('create.maxViews.views5')}</SelectItem>
+                          <SelectItem value="10">{t('create.maxViews.views10')}</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
                   </div>
 
                   <InlineTip className="mt-4">
-                    <strong>Security strategy:</strong> Use shorter expiration times (15 minutes) for passwords and longer periods for less sensitive information like usernames or server names.
+                    <strong>{t('create.form.securityStrategy')}</strong> {t('create.form.securityStrategyDesc')}
                   </InlineTip>
 
                   <div className="space-y-4">
                     <div className="flex items-center justify-between">
                       <div>
-                        <Label htmlFor="requirePassword">Require Password</Label>
-                        <p className="text-sm text-gray-600">Add an extra layer of security</p>
+                        <Label htmlFor="requirePassword">{t('create.form.requirePassword')}</Label>
+                        <p className="text-sm text-gray-600">{t('create.form.requirePasswordDesc')}</p>
                       </div>
                       <Switch
                         id="requirePassword"
@@ -720,8 +720,8 @@ export default function CreatePage() {
                   </RadioGroup>
                   <p className="text-sm text-gray-600 mt-1">
                     {formData.linkType === "standard" 
-                      ? "Standard links use longer, more secure identifiers for maximum security."
-                      : "Shorter links are easier to share but use shorter identifiers (still cryptographically secure)."}
+                      ? t('create.form.linkTypeStandardDesc')
+                      : t('create.form.linkTypeShorterDesc')}
                   </p>
                 </div>
               )}
@@ -729,13 +729,12 @@ export default function CreatePage() {
               <Alert>
                 <Key className="w-4 h-4" />
                 <AlertDescription>
-                  <strong>Zero-Knowledge Encryption:</strong> Your data is encrypted in your browser using AES-256. The
-                  encryption key never leaves your device and is embedded in the share URL.
+                  <strong>{t('create.form.zeroKnowledgeTitle')}</strong> {t('create.form.zeroKnowledgeDesc')}
                 </AlertDescription>
               </Alert>
 
               <Button type="submit" className="w-full" disabled={isLoading}>
-                {isLoading ? "Creating Secure Links..." : formData.multiRecipient ? "Create Secure Links" : "Create Secure Link"}
+                {isLoading ? t('create.form.creatingSecureLinks') : formData.multiRecipient ? t('create.form.createSecureLinks') : t('create.form.createSecureLink')}
               </Button>
             </form>
           </CardContent>

@@ -14,6 +14,7 @@ import { getSecureShare, getShareMetadata, testShareExists } from "../../actions
 import { SecureCrypto } from "../../../lib/crypto"
 import { AccessTips } from "@/components/access-tips"
 import { PasswordInput } from "@/components/password-input"
+import { useTranslation } from "react-i18next"
 
 interface SecureShare {
   id: string
@@ -36,6 +37,7 @@ interface ShareMetadata {
 }
 
 export default function ViewPage({ params }: { params: { id: string } }) {
+  const { t } = useTranslation();
   const [shareId, setShareId] = useState<string>("")
   const [share, setShare] = useState<SecureShare | null>(null)
   const [metadata, setMetadata] = useState<ShareMetadata | null>(null)
@@ -47,6 +49,7 @@ export default function ViewPage({ params }: { params: { id: string } }) {
   const [copied, setCopied] = useState(false)
   const [isClient, setIsClient] = useState(false)
   const [encryptionKey, setEncryptionKey] = useState<CryptoKey | null>(null)
+  const [keyLoaded, setKeyLoaded] = useState(false)
 
   useEffect(() => {
     const initializePage = async () => {
@@ -57,7 +60,9 @@ export default function ViewPage({ params }: { params: { id: string } }) {
 
       if (id) {
         loadMetadata(id)
-        loadEncryptionKey()
+        if (!keyLoaded) {
+          loadEncryptionKey()
+        }
       }
 
 
@@ -100,7 +105,7 @@ export default function ViewPage({ params }: { params: { id: string } }) {
   }
 
   const loadEncryptionKey = async () => {
-    if (typeof window !== "undefined") {
+    if (typeof window !== "undefined" && !keyLoaded) {
       const fullUrl = window.location.href
       const hashPart = window.location.hash
       let keyFromUrl = hashPart.substring(1) // Remove #
@@ -117,18 +122,22 @@ export default function ViewPage({ params }: { params: { id: string } }) {
         try {
           const key = await SecureCrypto.importKey(keyFromUrl)
           setEncryptionKey(key)
+          setKeyLoaded(true)
 
           // *** VULNERABILITY FIX ***
           // After storing the key, remove it from the URL to prevent it from being
           // included in the Next.js router state and sent to the server.
-          const urlWithoutHash = window.location.pathname + window.location.search
-          window.history.replaceState({}, document.title, urlWithoutHash)
+          // Use setTimeout to ensure this happens after hydration is complete
+          setTimeout(() => {
+            const urlWithoutHash = window.location.pathname + window.location.search
+            window.history.replaceState({}, document.title, urlWithoutHash)
+          }, 100)
           
         } catch (error) {
-          setError("Invalid or corrupted encryption key in URL")
+          setError(t('view.errors.invalidEncryptionKey'))
         }
       } else {
-        setError("No encryption key found in URL. Make sure you're using the complete share link.")
+        setError(t('view.errors.noEncryptionKeyDescription'))
       }
     }
   }
@@ -136,12 +145,12 @@ export default function ViewPage({ params }: { params: { id: string } }) {
   const handleAccess = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!encryptionKey) {
-      setError("Encryption key not available")
+      setError(t('view.errors.encryptionKeyNotAvailable'))
       return
     }
 
     if (!shareId) {
-      setError("Share ID not available")
+      setError(t('view.shareIdNotAvailable'))
       return
     }
 
@@ -162,13 +171,13 @@ export default function ViewPage({ params }: { params: { id: string } }) {
           setDecryptedContent(decrypted)
           setShowContent(true)
         } catch (decryptError) {
-          setError("Failed to decrypt content. The encryption key may be incorrect or corrupted.")
+          setError(t('view.errors.failedToDecrypt'))
         }
       } else {
-        setError(result.error || "Failed to access secure share")
+        setError(result.error || t('view.errors.failedToAccessShare'))
       }
     } catch (error) {
-      setError("An unexpected error occurred")
+      setError(t('view.errors.unexpectedError'))
     } finally {
       setIsLoading(false)
     }
@@ -187,15 +196,15 @@ export default function ViewPage({ params }: { params: { id: string } }) {
     const expires = new Date(expiresAt)
     const diff = expires.getTime() - now.getTime()
 
-    if (diff <= 0) return "Expired"
+    if (diff <= 0) return t('view.timeRemaining.expired')
 
     const hours = Math.floor(diff / (1000 * 60 * 60))
     const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60))
 
     if (hours > 0) {
-      return `${hours}h ${minutes}m remaining`
+      return t('view.timeRemaining.hoursMinutes', { hours, minutes })
     }
-    return `${minutes}m remaining`
+    return t('view.timeRemaining.minutes', { minutes })
   }
 
   if (!isClient) {
@@ -203,7 +212,7 @@ export default function ViewPage({ params }: { params: { id: string } }) {
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p>Loading secure decryption...</p>
+          <p>{t('view.loadingDecryption')}</p>
         </div>
       </div>
     )
@@ -220,9 +229,9 @@ export default function ViewPage({ params }: { params: { id: string } }) {
                   <Shield className="w-8 h-8 text-green-600" />
                 </div>
               </div>
-              <CardTitle className="text-center">{share.title || "Secure Content"}</CardTitle>
+              <CardTitle className="text-center">{share.title || t('view.secureContent')}</CardTitle>
               <CardDescription className="text-center">
-                Content decrypted successfully using client-side AES-256 encryption
+                {t('view.contentDecryptedSuccessfully')}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
@@ -234,13 +243,13 @@ export default function ViewPage({ params }: { params: { id: string } }) {
                 <div className="flex items-center gap-2">
                   <Eye className="w-4 h-4 text-blue-500" />
                   <span className="text-blue-600 dark:text-blue-400 font-medium">
-                    {share.currentViews}/{share.maxViews} views
+                    {share.maxViews === 1 ? t('view.burnAfterReading') : `${share.currentViews}/${share.maxViews} ${t('view.views')}`}
                   </span>
                 </div>
               </div>
 
               <div>
-                <Label>Decrypted Content</Label>
+                <Label>{t('view.decryptedContent')}</Label>
                 <div className="mt-2 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg border dark:border-gray-700">
                   <div className="flex justify-between items-start gap-4">
                     <pre className="whitespace-pre-wrap font-mono text-sm flex-1 break-all text-gray-900 dark:text-gray-100">{decryptedContent}</pre>
@@ -248,29 +257,27 @@ export default function ViewPage({ params }: { params: { id: string } }) {
                       <Copy className="w-4 h-4" />
                     </Button>
                   </div>
-                  {copied && <p className="text-sm text-green-600 mt-2">Copied to clipboard!</p>}
+                  {copied && <p className="text-sm text-green-600 mt-2">{t('common.copiedToClipboard')}</p>}
                 </div>
               </div>
 
               <Alert>
                 <Key className="w-4 h-4" />
                 <AlertDescription>
-                  <strong>Security Notice:</strong> This content was decrypted locally in your browser. The server never
-                  had access to your unencrypted data or the decryption key.
+                  <strong>{t('view.securityNoticeTitle')}</strong> {t('view.securityNoticeContent')}
                 </AlertDescription>
               </Alert>
 
               <Alert>
                 <AlertTriangle className="w-4 h-4" />
                 <AlertDescription>
-                  <strong>Important:</strong> This content has been viewed and may be automatically destroyed based on
-                  the expiration settings. Save it securely if needed.
+                  <strong>{t('view.importantNoticeTitle')}</strong> {t('view.importantNoticeContent')}
                 </AlertDescription>
               </Alert>
 
               <div className="text-center">
                 <Link href="/create">
-                  <Button>Create Your Own Secure Share</Button>
+                  <Button>{t('view.createYourOwn')}</Button>
                 </Link>
               </div>
             </CardContent>
@@ -290,13 +297,13 @@ export default function ViewPage({ params }: { params: { id: string } }) {
                 <Shield className="w-8 h-8 text-blue-600" />
               </div>
             </div>
-            <CardTitle>Access Secure Content</CardTitle>
+            <CardTitle>{t('view.accessSecureContent')}</CardTitle>
             <CardDescription>
-              {metadata?.title && `Accessing: ${metadata.title}`}
+              {metadata?.title && `${t('view.accessing')}: ${metadata.title}`}
               <br />
-              Share ID: {shareId}
+              {t('view.shareId')}: {shareId}
               <br />
-              Client-side decryption with AES-256
+              {t('view.clientSideDecryption')}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -312,7 +319,7 @@ export default function ViewPage({ params }: { params: { id: string } }) {
                   <div className="flex items-center gap-2">
                     <Eye className="w-4 h-4 text-blue-500" />
                     <span className="text-blue-600 dark:text-blue-400 font-medium">
-                      {metadata.currentViews}/{metadata.maxViews} views
+                      {metadata.maxViews === 1 ? t('view.burnAfterReading') : `${metadata.currentViews}/${metadata.maxViews} ${t('view.views')}`}
                     </span>
                   </div>
                 </div>
@@ -322,10 +329,10 @@ export default function ViewPage({ params }: { params: { id: string } }) {
             <form onSubmit={handleAccess} className="space-y-4">
               {metadata?.requirePassword && (
                 <div>
-                  <Label htmlFor="password">Access Password</Label>
+                  <Label htmlFor="password">{t('view.accessPassword')}</Label>
                   <PasswordInput
                     id="password"
-                    placeholder="Enter the required password"
+                    placeholder={t('view.enterRequiredPassword')}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required
@@ -337,13 +344,10 @@ export default function ViewPage({ params }: { params: { id: string } }) {
                 <Alert variant="destructive">
                   <AlertTriangle className="w-4 h-4" />
                   <AlertDescription>
-                    No encryption key found in URL. Make sure you're using the complete share link including the
-                    fragment (#) part.
+                    {t('view.errors.noEncryptionKey')}
                     <br />
                     <br />
-                    <strong>Expected URL format:</strong>
-                    <br />
-                    <code className="text-xs">https://ardd.cloud/view/[id]#[encryption-key]</code>
+                    {t('view.errors.expectedUrlFormat')}
                   </AlertDescription>
                 </Alert>
               )}
@@ -356,21 +360,20 @@ export default function ViewPage({ params }: { params: { id: string } }) {
               )}
 
               <Button type="submit" className="w-full" disabled={isLoading || !encryptionKey}>
-                {isLoading ? "Decrypting..." : "Access Content"}
+                {isLoading ? t('view.decrypting') : t('view.accessContent')}
               </Button>
             </form>
 
             <Alert className="mt-4">
               <Key className="w-4 h-4" />
               <AlertDescription>
-                <strong>Zero-Knowledge:</strong> Decryption happens entirely in your browser. The server never sees your
-                encryption key or decrypted content.
+                {t('view.zeroKnowledgeNotice')}
               </AlertDescription>
             </Alert>
 
             <div className="mt-6 text-center">
               <Link href="/create">
-                <Button variant="outline">Create Your Own Secure Share</Button>
+                <Button variant="outline">{t('view.createYourOwn')}</Button>
               </Link>
             </div>
           </CardContent>

@@ -1,96 +1,90 @@
+"use client"
+
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Check, X, Flame, ArrowLeft, Shield, Lock, AlertTriangle } from "lucide-react"
 import Link from "next/link"
-import type { Metadata } from 'next'
-
-export const metadata: Metadata = {
-  title: 'DELE.TO - Alternative to OneTimeSecret',
-  description: 'DELE.TO offers true zero-knowledge security as an alternative to OneTimeSecret. Compare client-side vs server-side encryption approaches.',
-  openGraph: {
-    title: 'DELE.TO - Alternative to OneTimeSecret',
-    description: 'True zero-knowledge alternative to OneTimeSecret with client-side encryption and superior privacy protection.',
-    images: ['/SEO.png'],
-  },
-}
-
-const comparisonData = [
-  {
-    feature: "Client-Side Encryption",
-    deleto: true,
-    onetimesecret: false,
-    details: "DELE.TO encrypts in browser, OneTimeSecret encrypts on server"
-  },
-  {
-    feature: "Zero-Knowledge Architecture",
-    deleto: true,
-    onetimesecret: false,
-    details: "DELE.TO never sees your data, OneTimeSecret processes it server-side"
-  },
-  {
-    feature: "Custom Expiration Times",
-    deleto: true,
-    onetimesecret: false,
-    details: "Requires sign-up to use"
-  },
-  {
-    feature: "View Count Limits",
-    deleto: true,
-    onetimesecret: false,
-    details: "Requires sign-up to use"
-  },
-  {
-    feature: "Password Protection",
-    deleto: true,
-    onetimesecret: false,
-    details: "Requires sign-up to use"
-  },
-  {
-    feature: "Modern UI/UX",
-    deleto: true,
-    onetimesecret: false,
-    details: "DELE.TO has more modern, polished interface"
-  },
-  {
-    feature: "Mobile Responsive",
-    deleto: true,
-    onetimesecret: "partial",
-    details: "DELE.TO fully optimized for mobile"
-  },
-  {
-    feature: "File Sharing",
-    deleto: "coming-soon",
-    onetimesecret: false,
-    details: "Neither currently supports file uploads"
-  },
-  {
-    feature: "API Access",
-    deleto: false,
-    onetimesecret: true,
-    details: "OneTimeSecret offers REST API"
-  },
-  {
-    feature: "Self-Hosted Option",
-    deleto: true,
-    onetimesecret: true,
-    details: "OneTimeSecret available now, DELE.TO coming soon"
-  },
-  {
-    feature: "Open Source",
-    deleto: true,
-    onetimesecret: true,
-    details: "Both are open source projects"
-  },
-  {
-    feature: "Multi-Recipient Sharing",
-    deleto: true,
-    onetimesecret: false,
-    details: "DELE.TO supports sharing to multiple recipients"
-  }
-]
+import { useTranslation } from "react-i18next"
 
 export default function OneTimeSecretComparison() {
+  const { t } = useTranslation()
+
+  const getComparisonData = () => [
+    {
+      feature: t('vs.common.clientSideEncryption'),
+      deleto: true,
+      onetimesecret: false,
+      details: t('vs.common.comparisonDetails.clientSideEncryption')
+    },
+    {
+      feature: t('vs.common.zeroKnowledgeArchitecture'),
+      deleto: true,
+      onetimesecret: false,
+      details: t('vs.common.comparisonDetails.zeroKnowledgeArchitecture')
+  },
+    {
+      feature: t('vs.common.customExpirationTimes'),
+      deleto: true,
+      onetimesecret: false,
+      details: t('vs.common.comparisonDetails.customExpirationTimes')
+    },
+    {
+      feature: t('vs.common.viewCountLimits'),
+      deleto: true,
+      onetimesecret: false,
+      details: t('vs.common.comparisonDetails.customExpirationTimes')
+    },
+    {
+      feature: t('vs.common.passwordProtection'),
+      deleto: true,
+      onetimesecret: false,
+      details: t('vs.common.comparisonDetails.customExpirationTimes')
+    },
+    {
+      feature: t('vs.common.modernUiUx'),
+      deleto: true,
+      onetimesecret: false,
+      details: t('vs.common.comparisonDetails.modernUiUx')
+    },
+    {
+      feature: t('vs.common.mobileOptimized'),
+      deleto: true,
+      onetimesecret: t('vs.common.statusLabels.partial'),
+      details: t('vs.common.comparisonDetails.mobileOptimized')
+    },
+    {
+      feature: t('vs.common.fileSharing'),
+      deleto: "coming-soon",
+      onetimesecret: false,
+      details: t('vs.common.comparisonDetails.fileSharing')
+    },
+    {
+      feature: t('vs.common.apiAccess'),
+      deleto: false,
+      onetimesecret: true,
+      details: t('vs.common.comparisonDetails.apiAccess')
+    },
+    {
+      feature: t('vs.common.selfHosted'),
+      deleto: true,
+      onetimesecret: true,
+      details: t('vs.common.comparisonDetails.selfHosted')
+    },
+    {
+      feature: t('vs.common.openSource'),
+      deleto: true,
+      onetimesecret: true,
+      details: t('vs.common.comparisonDetails.openSource')
+    },
+    {
+      feature: t('vs.common.multiRecipientSharing'),
+      deleto: true,
+      onetimesecret: false,
+      details: t('vs.common.comparisonDetails.multiRecipientSharing')
+    }
+  ]
+
   return (
     <div className="min-h-screen">
       <div className="container mx-auto px-4 py-8">
@@ -98,7 +92,7 @@ export default function OneTimeSecretComparison() {
           <Link href="/">
             <Button variant="ghost">
               <ArrowLeft className="w-4 h-4 mr-2" />
-              Back to Home
+              {t('vs.common.backToAlternatives')}
             </Button>
           </Link>
         </div>
@@ -107,11 +101,10 @@ export default function OneTimeSecretComparison() {
           {/* Header */}
           <div className="text-center mb-12">
             <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">
-              DELE.TO - Alternative to OneTimeSecret
+              {t('vs.onetimesecret.title')}
             </h1>
             <p className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
-              Comparing client-side vs server-side encryption approaches. Both are popular,
-              but they handle your data very differently.
+              {t('vs.onetimesecret.subtitle')}
             </p>
           </div>
 
@@ -120,14 +113,12 @@ export default function OneTimeSecretComparison() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-amber-900">
                 <AlertTriangle className="w-5 h-5" />
-                Critical Security Difference
+                {t('vs.common.securityAnalysis.title')}
               </CardTitle>
             </CardHeader>
             <CardContent>
               <p className="text-amber-800">
-                <strong>DELE.TO</strong> encrypts your data in your browser before sending it anywhere (zero-knowledge).
-                <strong> OneTimeSecret</strong> receives your plaintext data and encrypts it on their servers.
-                This is a fundamental architectural difference that affects your privacy and security.
+                {t('vs.onetimesecret.securityAlert')}
               </p>
             </CardContent>
           </Card>
@@ -214,14 +205,14 @@ export default function OneTimeSecretComparison() {
                 <table className="w-full">
                   <thead>
                     <tr className="border-b">
-                      <th className="text-left py-3 px-4 font-medium">Feature</th>
+                      <th className="text-left py-3 px-4 font-medium">{t('vs.common.features')}</th>
                       <th className="text-center py-3 px-4 font-medium">DELE.TO</th>
                       <th className="text-center py-3 px-4 font-medium">OneTimeSecret</th>
                       <th className="text-left py-3 px-4 font-medium">Details</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {comparisonData.map((item, index) => (
+                    {getComparisonData().map((item: any, index: number) => (
                       <tr key={index} className="border-b hover:bg-gray-50 dark:hover:bg-gray-800">
                         <td className="py-3 px-4 font-medium">{item.feature}</td>
                         <td className="py-3 px-4 text-center">
@@ -230,7 +221,7 @@ export default function OneTimeSecretComparison() {
                           ) : item.deleto === false ? (
                             <X className="w-5 h-5 text-red-500 mx-auto" />
                           ) : item.deleto === "coming-soon" ? (
-                            <span className="text-sm text-amber-600 font-medium">Soon</span>
+                            <span className="text-sm text-amber-600 font-medium">{t('alternatives.soon')}</span>
                           ) : (
                             <span className="text-sm text-yellow-600">{item.deleto}</span>
                           )}

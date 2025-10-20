@@ -1,102 +1,96 @@
+"use client"
+
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Check, X, Flame, ArrowLeft, Shield, Lock } from "lucide-react"
 import Link from "next/link"
-import type { Metadata } from 'next'
-
-export const metadata: Metadata = {
-  title: 'DELE.TO - Alternative to PasswordPusher',
-  description: 'DELE.TO offers true zero-knowledge security as an alternative to PasswordPusher. Client-side encryption, password protection, and modern UI.',
-  openGraph: {
-    title: 'DELE.TO - Alternative to PasswordPusher',
-    description: 'True zero-knowledge alternative to PasswordPusher with client-side encryption and superior privacy protection.',
-    images: ['/SEO.png'],
-  },
-}
-
-const comparisonData = [
-  {
-    feature: "Client-Side Encryption",
-    deleto: true,
-    passwordpusher: false,
-    details: "DELE.TO encrypts in browser, PasswordPusher encrypts on server"
-  },
-  {
-    feature: "Zero-Knowledge Architecture",
-    deleto: true,
-    passwordpusher: false,
-    details: "DELE.TO never sees your data, PasswordPusher processes it server-side"
-  },
-  {
-    feature: "Custom Expiration Times",
-    deleto: true,
-    passwordpusher: true,
-    details: "Both offer flexible expiration settings"
-  },
-  {
-    feature: "View Count Limits",
-    deleto: true,
-    passwordpusher: true,
-    details: "Burn-after-reading functionality in both"
-  },
-  {
-    feature: "Password Protection",
-    deleto: true,
-    passwordpusher: true,
-    details: "DELE.TO adds optional password layer"
-  },
-  {
-    feature: "Modern UI/UX",
-    deleto: true,
-    passwordpusher: false,
-    details: "DELE.TO has more modern, polished interface"
-  },
-  {
-    feature: "Mobile Responsive",
-    deleto: true,
-    passwordpusher: "partial",
-    details: "DELE.TO fully optimized for mobile"
-  },
-  {
-    feature: "File Sharing",
-    deleto: "coming-soon",
-    passwordpusher: true,
-    details: "PasswordPusher supports file uploads, DELE.TO coming soon"
-  },
-  {
-    feature: "URL Sharing",
-    deleto: "coming-soon",
-    passwordpusher: true,
-    details: "PasswordPusher can share URLs securely, DELE.TO coming soon"
-  },
-  {
-    feature: "Self-Hosted Option",
-    deleto: true,
-    passwordpusher: true,
-    details: "PasswordPusher available now, DELE.TO coming soon"
-  },
-  {
-    feature: "Open Source",
-    deleto: true,
-    passwordpusher: true,
-    details: "Both are open source projects"
-  },
-  {
-    feature: "Multi-Recipient Sharing",
-    deleto: true,
-    passwordpusher: false,
-    details: "DELE.TO supports sharing to multiple recipients"
-  },
-  {
-    feature: "API Access",
-    deleto: false,
-    passwordpusher: true,
-    details: "PasswordPusher offers REST API"
-  }
-]
+import { useTranslation } from "react-i18next"
 
 export default function PasswordPusherComparison() {
+  const { t } = useTranslation()
+
+  const getComparisonData = () => [
+    {
+      feature: t('vs.common.clientSideEncryption'),
+      deleto: true,
+      passwordpusher: false,
+      details: t('vs.passwordpusher.clientSideEncryptionDetails')
+    },
+    {
+      feature: t('vs.common.zeroKnowledgeArchitecture'),
+      deleto: true,
+      passwordpusher: false,
+      details: t('vs.passwordpusher.zeroKnowledgeArchitectureDetails')
+    },
+    {
+      feature: t('vs.common.customExpirationTimes'),
+      deleto: true,
+      passwordpusher: true,
+      details: t('vs.passwordpusher.customExpirationTimesDetails')
+    },
+    {
+      feature: t('vs.common.viewCountLimits'),
+      deleto: true,
+      passwordpusher: true,
+      details: t('vs.passwordpusher.viewCountLimitsDetails')
+    },
+    {
+      feature: t('vs.common.passwordProtection'),
+      deleto: true,
+      passwordpusher: true,
+      details: t('vs.passwordpusher.passwordProtectionDetails')
+    },
+    {
+      feature: t('vs.common.modernUiUx'),
+      deleto: true,
+      passwordpusher: false,
+      details: t('vs.passwordpusher.modernUiUxDetails')
+    },
+    {
+      feature: t('vs.common.mobileOptimized'),
+      deleto: true,
+      passwordpusher: "partial",
+      details: t('vs.passwordpusher.mobileOptimizedDetails')
+    },
+    {
+      feature: t('vs.common.fileSharing'),
+      deleto: "coming-soon",
+      passwordpusher: true,
+      details: t('vs.passwordpusher.fileSharingDetails')
+    },
+    {
+      feature: t('vs.common.urlSharing'),
+      deleto: "coming-soon",
+      passwordpusher: true,
+      details: t('vs.passwordpusher.urlSharingDetails')
+    },
+    {
+      feature: t('vs.common.selfHosted'),
+      deleto: true,
+      passwordpusher: true,
+      details: t('vs.passwordpusher.selfHostedDetails')
+    },
+    {
+      feature: t('vs.common.openSource'),
+      deleto: true,
+      passwordpusher: true,
+      details: t('vs.passwordpusher.openSourceDetails')
+    },
+    {
+      feature: t('vs.common.multiRecipientSharing'),
+      deleto: true,
+      passwordpusher: false,
+      details: t('vs.passwordpusher.multiRecipientSharingDetails')
+    },
+    {
+      feature: t('vs.common.apiAccess'),
+      deleto: false,
+      passwordpusher: true,
+      details: t('vs.passwordpusher.apiAccessDetails')
+    }
+  ]
+
   return (
     <div className="min-h-screen">
       <div className="container mx-auto px-4 py-8">
@@ -227,7 +221,7 @@ export default function PasswordPusherComparison() {
                     </tr>
                   </thead>
                   <tbody>
-                    {comparisonData.map((item, index) => (
+                    {getComparisonData().map((item: any, index: number) => (
                       <tr key={index} className="border-b hover:bg-gray-50 dark:hover:bg-gray-800">
                         <td className="py-3 px-4 font-medium">{item.feature}</td>
                         <td className="py-3 px-4 text-center">

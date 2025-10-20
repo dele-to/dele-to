@@ -1,112 +1,110 @@
+"use client"
+
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Check, X, Flame, ArrowLeft, Shield, Lock, Zap, Code, AlertTriangle } from "lucide-react"
 import Link from "next/link"
-import type { Metadata } from 'next'
+import { useTranslation } from "react-i18next"
 
-export const metadata: Metadata = {
-  title: 'DELE.TO - Alternative to Yopass, PasswordPusher, PrivateBin & OneTimeSecret',
-  description: 'DELE.TO is the modern alternative to popular secure sharing tools. Zero-knowledge encryption, password protection, and superior UX.',
-  openGraph: {
-    title: 'DELE.TO - Alternative to Popular Password Sharing Tools',
-    description: 'Modern alternative to Yopass, PasswordPusher, PrivateBin, OneTimeSecret and other secure sharing tools with zero-knowledge security.',
-    images: ['/SEO.png'],
-  },
-}
-
-const alternatives = [
-  {
-    name: "DELE.TO",
-    description: "Modern zero-knowledge password sharing with client-side encryption",
-    icon: Flame,
-    color: "#D2461E",
-    features: ["Zero-knowledge", "Client-side encryption", "Multi-recipient sharing", "Password protection", "Modern UI", "Mobile-first"],
-    pricing: "Free",
-    security: "Excellent",
-    usability: "Excellent",
-    openSource: true,
-    selfHosted: true,
-    pros: ["True zero-knowledge architecture", "Multi-recipient sharing", "Modern, intuitive interface", "Optional password protection", "Mobile optimized"],
-    cons: ["File sharing coming soon"],
-    bestFor: "Teams prioritizing privacy and user experience"
-  },
-  {
-    name: "Yopass",
-    description: "Established secure sharing with file support",
-    icon: Shield,
-    color: "#2563eb",
-    features: ["Client-side encryption", "File sharing", "Open source", "Self-hosted", "Established"],
-    pricing: "Free",
-    security: "Excellent",
-    usability: "Good",
-    openSource: true,
-    selfHosted: true,
-    pros: ["File sharing support", "Proven track record", "Active development", "Multiple deployment options"],
-    cons: ["Basic UI", "No password protection", "Limited mobile optimization"],
-    bestFor: "Users needing file sharing with passwords"
-  },
-  {
-    name: "PasswordPusher",
-    description: "Feature-rich sharing with API access",
-    icon: Lock,
-    color: "#7c3aed",
-    features: ["Server-side encryption", "File sharing", "API access", "URL sharing", "Extensive features"],
-    pricing: "Free / Paid",
-    security: "Good",
-    usability: "Good",
-    openSource: true,
-    selfHosted: true,
-    pros: ["Rich feature set", "API access", "File and URL sharing", "Good documentation"],
-    cons: ["Server-side encryption", "Not zero-knowledge", "Complex interface"],
-    bestFor: "Organizations needing API integration and file sharing"
-  },
-  {
-    name: "PrivateBin",
-    description: "Developer-focused pastebin with zero-knowledge encryption",
-    icon: Code,
-    color: "#6b7280",
-    features: ["Zero-knowledge", "Code sharing", "Syntax highlighting", "File sharing", "Discussion"],
-    pricing: "Free",
-    security: "Excellent",
-    usability: "Good",
-    openSource: true,
-    selfHosted: true,
-    pros: ["Zero-knowledge architecture", "Syntax highlighting", "File sharing", "Discussion features"],
-    cons: ["Basic UI", "Developer-focused", "Limited mobile optimization"],
-    bestFor: "Developers sharing code snippets and files"
-  },
-  {
-    name: "OneTimeSecret",
-    description: "Enterprise-focused with API and compliance features",
-    icon: AlertTriangle,
-    color: "#3b82f6",
-    features: ["Server-side encryption", "API access", "Custom domains", "Compliance", "Enterprise"],
-    pricing: "Free / Paid",
-    security: "Good",
-    usability: "Good",
-    openSource: true,
-    selfHosted: true,
-    pros: ["API access", "Custom domains", "Compliance features", "Enterprise support"],
-    cons: ["Server-side encryption", "Not zero-knowledge", "Paid features"],
-    bestFor: "Enterprises needing API integration and compliance"
-  }
-]
-
-const comparisonMatrix = [
-  { feature: "Multi-Recipient Sharing", deleto: true, yopass: false, passwordpusher: false, privatebin: false, onetimesecret: false },
-  { feature: "Zero-Knowledge", deleto: true, yopass: true, passwordpusher: false, privatebin: true, onetimesecret: false },
-  { feature: "Client-Side Encryption", deleto: true, yopass: true, passwordpusher: false, privatebin: true, onetimesecret: false },
-  { feature: "Password Protection", deleto: true, yopass: false, passwordpusher: false, privatebin: true, onetimesecret: true },
-  { feature: "File Sharing", deleto: "coming-soon", yopass: true, passwordpusher: true, privatebin: true, onetimesecret: false },
-  { feature: "API Access", deleto: false, yopass: false, passwordpusher: true, privatebin: false, onetimesecret: true },
-  { feature: "Self-Hosted", deleto: true, yopass: true, passwordpusher: true, privatebin: true, onetimesecret: true },
-  { feature: "Open Source", deleto: true, yopass: true, passwordpusher: true, privatebin: true, onetimesecret: true },
-  { feature: "Mobile Optimized", deleto: true, yopass: false, passwordpusher: false, privatebin: false, onetimesecret: false },
-  { feature: "Syntax Highlighting", deleto: false, yopass: false, passwordpusher: false, privatebin: true, onetimesecret: false },
-]
 
 export default function AlternativesPage() {
+  const { t } = useTranslation()
+  
+  const getAlternatives = () => [
+    {
+      name: t('alternatives.tools.deleto.name'),
+      description: t('alternatives.tools.deleto.description'),
+      icon: Flame,
+      color: "#D2461E",
+      features: t('alternatives.tools.deleto.features', { returnObjects: true }) as string[],
+      pricing: t('alternatives.tools.deleto.pricing'),
+      security: t('alternatives.tools.deleto.security'),
+      usability: t('alternatives.tools.deleto.usability'),
+      openSource: true,
+      selfHosted: true,
+      pros: t('alternatives.tools.deleto.pros', { returnObjects: true }) as string[],
+      cons: t('alternatives.tools.deleto.cons', { returnObjects: true }) as string[],
+      bestFor: t('alternatives.tools.deleto.bestFor')
+    },
+    {
+      name: t('alternatives.tools.yopass.name'),
+      description: t('alternatives.tools.yopass.description'),
+      icon: Shield,
+      color: "#2563eb",
+      features: t('alternatives.tools.yopass.features', { returnObjects: true }) as string[],
+      pricing: t('alternatives.tools.yopass.pricing'),
+      security: t('alternatives.tools.yopass.security'),
+      usability: t('alternatives.tools.yopass.usability'),
+      openSource: true,
+      selfHosted: true,
+      pros: t('alternatives.tools.yopass.pros', { returnObjects: true }) as string[],
+      cons: t('alternatives.tools.yopass.cons', { returnObjects: true }) as string[],
+      bestFor: t('alternatives.tools.yopass.bestFor')
+    },
+    {
+      name: t('alternatives.tools.passwordpusher.name'),
+      description: t('alternatives.tools.passwordpusher.description'),
+      icon: Lock,
+      color: "#7c3aed",
+      features: t('alternatives.tools.passwordpusher.features', { returnObjects: true }) as string[],
+      pricing: t('alternatives.tools.passwordpusher.pricing'),
+      security: t('alternatives.tools.passwordpusher.security'),
+      usability: t('alternatives.tools.passwordpusher.usability'),
+      openSource: true,
+      selfHosted: true,
+      pros: t('alternatives.tools.passwordpusher.pros', { returnObjects: true }) as string[],
+      cons: t('alternatives.tools.passwordpusher.cons', { returnObjects: true }) as string[],
+      bestFor: t('alternatives.tools.passwordpusher.bestFor')
+    },
+    {
+      name: t('alternatives.tools.privatebin.name'),
+      description: t('alternatives.tools.privatebin.description'),
+      icon: Code,
+      color: "#6b7280",
+      features: t('alternatives.tools.privatebin.features', { returnObjects: true }) as string[],
+      pricing: t('alternatives.tools.privatebin.pricing'),
+      security: t('alternatives.tools.privatebin.security'),
+      usability: t('alternatives.tools.privatebin.usability'),
+      openSource: true,
+      selfHosted: true,
+      pros: t('alternatives.tools.privatebin.pros', { returnObjects: true }) as string[],
+      cons: t('alternatives.tools.privatebin.cons', { returnObjects: true }) as string[],
+      bestFor: t('alternatives.tools.privatebin.bestFor')
+    },
+    {
+      name: t('alternatives.tools.onetimesecret.name'),
+      description: t('alternatives.tools.onetimesecret.description'),
+      icon: AlertTriangle,
+      color: "#3b82f6",
+      features: t('alternatives.tools.onetimesecret.features', { returnObjects: true }) as string[],
+      pricing: t('alternatives.tools.onetimesecret.pricing'),
+      security: t('alternatives.tools.onetimesecret.security'),
+      usability: t('alternatives.tools.onetimesecret.usability'),
+      openSource: true,
+      selfHosted: true,
+      pros: t('alternatives.tools.onetimesecret.pros', { returnObjects: true }) as string[],
+      cons: t('alternatives.tools.onetimesecret.cons', { returnObjects: true }) as string[],
+      bestFor: t('alternatives.tools.onetimesecret.bestFor')
+    }
+  ]
+
+  const getComparisonMatrix = () => [
+    { feature: t('alternatives.features.multiRecipient'), deleto: true, yopass: false, passwordpusher: false, privatebin: false, onetimesecret: false },
+    { feature: t('alternatives.features.zeroKnowledge'), deleto: true, yopass: true, passwordpusher: false, privatebin: true, onetimesecret: false },
+    { feature: t('alternatives.features.clientSideEncryption'), deleto: true, yopass: true, passwordpusher: false, privatebin: true, onetimesecret: false },
+    { feature: t('alternatives.features.passwordProtection'), deleto: true, yopass: false, passwordpusher: false, privatebin: true, onetimesecret: true },
+    { feature: t('alternatives.features.fileSharing'), deleto: "coming-soon", yopass: true, passwordpusher: true, privatebin: true, onetimesecret: false },
+    { feature: t('alternatives.features.apiAccess'), deleto: false, yopass: false, passwordpusher: true, privatebin: false, onetimesecret: true },
+    { feature: t('alternatives.features.selfHosted'), deleto: true, yopass: true, passwordpusher: true, privatebin: true, onetimesecret: true },
+    { feature: t('alternatives.features.openSource'), deleto: true, yopass: true, passwordpusher: true, privatebin: true, onetimesecret: true },
+    { feature: t('alternatives.features.mobileOptimized'), deleto: true, yopass: false, passwordpusher: false, privatebin: false, onetimesecret: false },
+    { feature: t('alternatives.features.syntaxHighlighting'), deleto: false, yopass: false, passwordpusher: false, privatebin: true, onetimesecret: false },
+  ]
+
+  const alternatives = getAlternatives()
+  const comparisonMatrix = getComparisonMatrix()
+  
   return (
     <div className="min-h-screen">
       <div className="container mx-auto px-4 py-8">
@@ -114,7 +112,7 @@ export default function AlternativesPage() {
           <Link href="/">
             <Button variant="ghost">
               <ArrowLeft className="w-4 h-4 mr-2" />
-              Back to Home
+              {t('alternatives.backToHome')}
             </Button>
           </Link>
         </div>
@@ -123,11 +121,10 @@ export default function AlternativesPage() {
           {/* Header */}
           <div className="text-center mb-12">
             <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">
-              DELE.TO - Alternative to Popular Password Sharing Tools
+              {t('alternatives.title')}
             </h1>
             <p className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
-              Compare the top 5 secure password sharing tools. Find the perfect solution
-              for your security needs, team size, and technical requirements.
+              {t('alternatives.subtitle')}
             </p>
           </div>
 
@@ -147,7 +144,7 @@ export default function AlternativesPage() {
                           <CardTitle className="text-lg">{alt.name}</CardTitle>
                           {alt.name === "DELE.TO" && (
                             <Badge style={{ backgroundColor: '#D2461E' }} className="text-white text-xs">
-                              Recommended
+                              {t('alternatives.recommended')}
                             </Badge>
                           )}
                         </div>
@@ -167,36 +164,36 @@ export default function AlternativesPage() {
 
                       <div className="space-y-2">
                         <div className="flex justify-between items-center">
-                          <span className="text-xs font-medium">Security:</span>
+                          <span className="text-xs font-medium">{t('alternatives.security')}:</span>
                           <span className={`text-xs font-medium ${
-                            alt.security === 'Excellent' ? 'text-green-600' :
-                            alt.security === 'Good' ? 'text-blue-600' : 'text-yellow-600'
+                            alt.security === t('alternatives.ratings.excellent') ? 'text-green-600' :
+                            alt.security === t('alternatives.ratings.good') ? 'text-blue-600' : 'text-yellow-600'
                           }`}>
                             {alt.security}
                           </span>
                         </div>
                         <div className="flex justify-between items-center">
-                          <span className="text-xs font-medium">Usability:</span>
+                          <span className="text-xs font-medium">{t('alternatives.usability')}:</span>
                           <span className={`text-xs font-medium ${
-                            alt.usability === 'Excellent' ? 'text-green-600' : 'text-blue-600'
+                            alt.usability === t('alternatives.ratings.excellent') ? 'text-green-600' : 'text-blue-600'
                           }`}>
                             {alt.usability}
                           </span>
                         </div>
                         <div className="flex justify-between items-center">
-                          <span className="text-xs font-medium">Price:</span>
+                          <span className="text-xs font-medium">{t('alternatives.price')}:</span>
                           <span className="text-xs text-gray-600 dark:text-gray-400">{alt.pricing}</span>
                         </div>
                       </div>
 
                       <div className="text-xs text-gray-600 dark:text-gray-400 border-t pt-2">
-                        <strong>Best for:</strong> {alt.bestFor}
+                        <strong>{t('alternatives.bestFor')}:</strong> {alt.bestFor}
                       </div>
 
-                      {alt.name === "DELE.TO" && (
+                      {alt.name === t('alternatives.tools.deleto.name') && (
                         <Link href="/create">
                           <Button size="sm" style={{ backgroundColor: '#D2461E' }} className="w-full text-white hover:opacity-90">
-                            Try Now
+                            {t('alternatives.tryNow')}
                           </Button>
                         </Link>
                       )}
@@ -210,7 +207,7 @@ export default function AlternativesPage() {
           {/* Additional Alternatives */}
           <div className="mb-12">
             <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-6 text-center">
-              Additional Alternatives
+              {t('alternatives.additionalAlternatives')}
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
               {alternatives.slice(3).map((alt, index) => {
@@ -242,7 +239,7 @@ export default function AlternativesPage() {
 
                         <div className="space-y-2">
                           <div className="flex justify-between items-center">
-                            <span className="text-xs font-medium">Security:</span>
+                            <span className="text-xs font-medium">{t('alternatives.security')}:</span>
                             <span className={`text-xs font-medium ${
                               alt.security === 'Excellent' ? 'text-green-600' :
                               alt.security === 'Good' ? 'text-blue-600' : 'text-yellow-600'
@@ -251,7 +248,7 @@ export default function AlternativesPage() {
                             </span>
                           </div>
                           <div className="flex justify-between items-center">
-                            <span className="text-xs font-medium">Usability:</span>
+                            <span className="text-xs font-medium">{t('alternatives.usability')}:</span>
                             <span className={`text-xs font-medium ${
                               alt.usability === 'Excellent' ? 'text-green-600' : 'text-blue-600'
                             }`}>
@@ -259,7 +256,7 @@ export default function AlternativesPage() {
                             </span>
                           </div>
                           <div className="flex justify-between items-center">
-                            <span className="text-xs font-medium">Price:</span>
+                            <span className="text-xs font-medium">{t('alternatives.price')}:</span>
                             <span className="text-xs text-gray-600 dark:text-gray-400">{alt.pricing}</span>
                           </div>
                         </div>
@@ -278,9 +275,9 @@ export default function AlternativesPage() {
           {/* Detailed Comparison Matrix */}
           <Card className="mb-12">
             <CardHeader>
-              <CardTitle>Feature Comparison Matrix</CardTitle>
+              <CardTitle>{t('alternatives.featureComparison')}</CardTitle>
               <CardDescription>
-                Compare key features across all major secure sharing platforms
+                {t('alternatives.featureComparisonDesc')}
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -288,12 +285,12 @@ export default function AlternativesPage() {
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="border-b">
-                      <th className="text-left py-3 px-2 font-medium">Feature</th>
-                      <th className="text-center py-3 px-2 font-medium">DELE.TO</th>
-                      <th className="text-center py-3 px-2 font-medium">Yopass</th>
-                      <th className="text-center py-3 px-2 font-medium">PasswordPusher</th>
-                      <th className="text-center py-3 px-2 font-medium">PrivateBin</th>
-                      <th className="text-center py-3 px-2 font-medium">OneTimeSecret</th>
+                      <th className="text-left py-3 px-2 font-medium">{t('alternatives.feature')}</th>
+                      <th className="text-center py-3 px-2 font-medium">{t('alternatives.tools.deleto.name')}</th>
+                      <th className="text-center py-3 px-2 font-medium">{t('alternatives.tools.yopass.name')}</th>
+                      <th className="text-center py-3 px-2 font-medium">{t('alternatives.tools.passwordpusher.name')}</th>
+                      <th className="text-center py-3 px-2 font-medium">{t('alternatives.tools.privatebin.name')}</th>
+                      <th className="text-center py-3 px-2 font-medium">{t('alternatives.tools.onetimesecret.name')}</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -306,7 +303,7 @@ export default function AlternativesPage() {
                           ) : row.deleto === false ? (
                             <X className="w-4 h-4 text-red-500 mx-auto" />
                           ) : row.deleto === "coming-soon" ? (
-                            <span className="text-xs text-amber-600 font-medium">Soon</span>
+                            <span className="text-xs text-amber-600 font-medium">{t('alternatives.soon')}</span>
                           ) : (
                             <X className="w-4 h-4 text-red-500 mx-auto" />
                           )}
@@ -323,7 +320,7 @@ export default function AlternativesPage() {
                           ) : row.privatebin === false ? (
                             <X className="w-4 h-4 text-red-500 mx-auto" />
                           ) : row.privatebin === "coming-soon" ? (
-                            <span className="text-xs text-amber-600 font-medium">Soon</span>
+                            <span className="text-xs text-amber-600 font-medium">{t('alternatives.soon')}</span>
                           ) : (
                             <X className="w-4 h-4 text-red-500 mx-auto" />
                           )}
@@ -334,7 +331,7 @@ export default function AlternativesPage() {
                           ) : row.onetimesecret === false ? (
                             <X className="w-4 h-4 text-red-500 mx-auto" />
                           ) : row.onetimesecret === "coming-soon" ? (
-                            <span className="text-xs text-amber-600 font-medium">Soon</span>
+                            <span className="text-xs text-amber-600 font-medium">{t('alternatives.soon')}</span>
                           ) : (
                             <X className="w-4 h-4 text-red-500 mx-auto" />
                           )}
@@ -351,17 +348,17 @@ export default function AlternativesPage() {
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
             <Card>
               <CardHeader>
-                <CardTitle className="text-green-600">🏢 For Businesses</CardTitle>
+                <CardTitle className="text-green-600">{t('alternatives.useCases.businesses.title')}</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
                   <div>
-                    <p className="font-medium">Best Choice: DELE.TO</p>
-                    <p className="text-sm text-gray-600">Zero-knowledge security with professional UI</p>
+                    <p className="font-medium">{t('alternatives.useCases.businesses.bestChoice')}</p>
+                    <p className="text-sm text-gray-600">{t('alternatives.useCases.businesses.bestChoiceDesc')}</p>
                   </div>
                   <div>
-                    <p className="font-medium">Alternative: OneTimeSecret</p>
-                    <p className="text-sm text-gray-600">If you need API access and enterprise features</p>
+                    <p className="font-medium">{t('alternatives.useCases.businesses.alternative')}</p>
+                    <p className="text-sm text-gray-600">{t('alternatives.useCases.businesses.alternativeDesc')}</p>
                   </div>
                 </div>
               </CardContent>
@@ -369,17 +366,17 @@ export default function AlternativesPage() {
 
             <Card>
               <CardHeader>
-                <CardTitle className="text-blue-600">👨‍💻 For Developers</CardTitle>
+                <CardTitle className="text-blue-600">{t('alternatives.useCases.developers.title')}</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
                   <div>
-                    <p className="font-medium">Best Choice: PrivateBin</p>
-                    <p className="text-sm text-gray-600">Zero-knowledge with code sharing features</p>
+                    <p className="font-medium">{t('alternatives.useCases.developers.bestChoice')}</p>
+                    <p className="text-sm text-gray-600">{t('alternatives.useCases.developers.bestChoiceDesc')}</p>
                   </div>
                   <div>
-                    <p className="font-medium">Alternative: DELE.TO</p>
-                    <p className="text-sm text-gray-600">For maximum security and modern interface</p>
+                    <p className="font-medium">{t('alternatives.useCases.developers.alternative')}</p>
+                    <p className="text-sm text-gray-600">{t('alternatives.useCases.developers.alternativeDesc')}</p>
                   </div>
                 </div>
               </CardContent>
@@ -387,19 +384,19 @@ export default function AlternativesPage() {
 
             <Card>
               <CardHeader>
-                <CardTitle className="text-purple-600">👤 For Personal Use</CardTitle>
+                <CardTitle className="text-purple-600">{t('alternatives.useCases.personal.title')}</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
                   <div>
-                    <p className="font-medium">Best Choice: DELE.TO</p>
+                    <p className="font-medium">{t('alternatives.useCases.personal.bestChoice')}</p>
                     <p className="text-sm text-gray-600">
-                      Perfect balance of security and usability
+                      {t('alternatives.useCases.personal.bestChoiceDesc')}
                     </p>
                   </div>
                   <div>
-                    <p className="font-medium">Alternative: PrivateBin</p>
-                    <p className="text-sm text-gray-600">For zero-knowledge sharing with file support</p>
+                    <p className="font-medium">{t('alternatives.useCases.personal.alternative')}</p>
+                    <p className="text-sm text-gray-600">{t('alternatives.useCases.personal.alternativeDesc')}</p>
                   </div>
                 </div>
               </CardContent>
@@ -409,23 +406,23 @@ export default function AlternativesPage() {
           {/* Security Comparison */}
           <Card className="mb-12">
             <CardHeader>
-              <CardTitle>Security Model Comparison</CardTitle>
+              <CardTitle>{t('alternatives.securityComparison.title')}</CardTitle>
               <CardDescription>
-                Understanding how each platform handles your sensitive data
+                {t('alternatives.securityComparison.subtitle')}
               </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="grid md:grid-cols-2 gap-8">
                 <div>
-                  <h4 className="font-semibold mb-4 text-green-600">Zero-Knowledge (Most Secure)</h4>
+                  <h4 className="font-semibold mb-4 text-green-600">{t('alternatives.securityComparison.zeroKnowledge')}</h4>
                   <div className="space-y-3">
                     <div className="flex items-center gap-3">
                       <div className="p-1 rounded-full" style={{ backgroundColor: '#D2461E' }}>
                         <Flame className="w-4 h-4 text-white" />
                       </div>
                       <div>
-                        <p className="font-medium">DELE.TO</p>
-                        <p className="text-sm text-gray-600">Client-side AES-256-GCM encryption</p>
+                        <p className="font-medium">{t('alternatives.tools.deleto.name')}</p>
+                        <p className="text-sm text-gray-600">{t('alternatives.securityComparison.descriptions.deletoEncryption')}</p>
                       </div>
                     </div>
                     <div className="flex items-center gap-3">
@@ -433,8 +430,8 @@ export default function AlternativesPage() {
                         <Shield className="w-4 h-4 text-white" />
                       </div>
                       <div>
-                        <p className="font-medium">Yopass</p>
-                        <p className="text-sm text-gray-600">Client-side AES encryption</p>
+                        <p className="font-medium">{t('alternatives.tools.yopass.name')}</p>
+                        <p className="text-sm text-gray-600">{t('alternatives.securityComparison.descriptions.yopassEncryption')}</p>
                       </div>
                     </div>
                     <div className="flex items-center gap-3">
@@ -442,23 +439,23 @@ export default function AlternativesPage() {
                         <Code className="w-4 h-4 text-white" />
                       </div>
                       <div>
-                        <p className="font-medium">PrivateBin</p>
-                        <p className="text-sm text-gray-600">Zero-knowledge pastebin encryption</p>
+                        <p className="font-medium">{t('alternatives.tools.privatebin.name')}</p>
+                        <p className="text-sm text-gray-600">{t('alternatives.securityComparison.descriptions.privatebinEncryption')}</p>
                       </div>
                     </div>
                   </div>
                 </div>
 
                 <div>
-                  <h4 className="font-semibold mb-4 text-yellow-600">Server-Side Encryption</h4>
+                  <h4 className="font-semibold mb-4 text-yellow-600">{t('alternatives.securityComparison.serverSide')}</h4>
                   <div className="space-y-3">
                     <div className="flex items-center gap-3">
                       <div className="p-1 bg-purple-600 rounded-full">
                         <Lock className="w-4 h-4 text-white" />
                       </div>
                       <div>
-                        <p className="font-medium">PasswordPusher</p>
-                        <p className="text-sm text-gray-600">Server receives plaintext, then encrypts</p>
+                        <p className="font-medium">{t('alternatives.tools.passwordpusher.name')}</p>
+                        <p className="text-sm text-gray-600">{t('alternatives.securityComparison.descriptions.passwordpusherEncryption')}</p>
                       </div>
                     </div>
                     <div className="flex items-center gap-3">
@@ -466,8 +463,8 @@ export default function AlternativesPage() {
                         <AlertTriangle className="w-4 h-4 text-white" />
                       </div>
                       <div>
-                        <p className="font-medium">OneTimeSecret</p>
-                        <p className="text-sm text-gray-600">Server-side encryption with passphrase</p>
+                        <p className="font-medium">{t('alternatives.tools.onetimesecret.name')}</p>
+                        <p className="text-sm text-gray-600">{t('alternatives.securityComparison.descriptions.onetimesecretEncryption')}</p>
                       </div>
                     </div>
                   </div>
@@ -479,7 +476,7 @@ export default function AlternativesPage() {
           {/* Final Recommendation */}
           <Card>
             <CardHeader>
-              <CardTitle>Why Choose DELE.TO?</CardTitle>
+              <CardTitle>{t('alternatives.whyChoose.title')}</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="grid md:grid-cols-3 gap-6">
@@ -487,27 +484,27 @@ export default function AlternativesPage() {
                   <div className="p-3 rounded-full mx-auto mb-3 w-fit" style={{ backgroundColor: '#D2461E' }}>
                     <Shield className="w-8 h-8 text-white" />
                   </div>
-                  <h4 className="font-semibold mb-2">Maximum Security</h4>
+                  <h4 className="font-semibold mb-2">{t('alternatives.whyChoose.maxSecurity')}</h4>
                   <p className="text-sm text-gray-600">
-                    True zero-knowledge architecture with client-side AES-256-GCM encryption
+                    {t('alternatives.whyChoose.maxSecurityDesc')}
                   </p>
                 </div>
                 <div className="text-center">
                   <div className="p-3 rounded-full mx-auto mb-3 w-fit" style={{ backgroundColor: '#D2461E' }}>
                     <Zap className="w-8 h-8 text-white" />
                   </div>
-                  <h4 className="font-semibold mb-2">Modern Experience</h4>
+                  <h4 className="font-semibold mb-2">{t('alternatives.whyChoose.modernExperience')}</h4>
                   <p className="text-sm text-gray-600">
-                    Built with Next.js 14, featuring a polished, mobile-first interface
+                    {t('alternatives.whyChoose.modernExperienceDesc')}
                   </p>
                 </div>
                 <div className="text-center">
                   <div className="p-3 rounded-full mx-auto mb-3 w-fit" style={{ backgroundColor: '#D2461E' }}>
                     <Lock className="w-8 h-8 text-white" />
                   </div>
-                  <h4 className="font-semibold mb-2">Extra Protection</h4>
+                  <h4 className="font-semibold mb-2">{t('alternatives.whyChoose.extraProtection')}</h4>
                   <p className="text-sm text-gray-600">
-                    Optional password protection and built-in security guidance
+                    {t('alternatives.whyChoose.extraProtectionDesc')}
                   </p>
                 </div>
               </div>
@@ -517,7 +514,7 @@ export default function AlternativesPage() {
           <div className="text-center mt-12">
             <Link href="/create">
               <Button size="lg" style={{ backgroundColor: '#D2461E' }} className="text-white hover:opacity-90">
-                Try DELE.TO - The Secure Choice
+                {t('alternatives.tryButton')}
               </Button>
             </Link>
           </div>
