@@ -4,7 +4,9 @@ import { GeistMono } from 'geist/font/mono'
 import { Footer } from '@/components/footer'
 import { ThemeProvider } from '@/components/theme-provider'
 import { ThemeToggle } from '@/components/theme-toggle'
+import { LanguageSwitcher } from '@/components/language-switcher'
 import { ConsoleMessage } from '@/components/console-message'
+import { I18nProvider } from '@/components/i18n-provider'
 import './globals.css'
 
 export const metadata: Metadata = {
@@ -55,6 +57,7 @@ export default function RootLayout({
       <head />
       <body
         className={`min-h-screen flex flex-col ${GeistSans.className} ${GeistSans.variable} ${GeistMono.variable}`}
+        suppressHydrationWarning
       >
         <ThemeProvider
           attribute="class"
@@ -62,9 +65,16 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <ConsoleMessage />
-          <main className="flex-1">{children}</main>
-          <Footer />
+          <I18nProvider>
+            <ConsoleMessage />
+            {/* Global controls - fixed position */}
+            <div className="fixed top-4 right-4 z-50 flex gap-2">
+              <LanguageSwitcher />
+              <ThemeToggle />
+            </div>
+            <main className="flex-1">{children}</main>
+            <Footer />
+          </I18nProvider>
         </ThemeProvider>
       </body>
     </html>

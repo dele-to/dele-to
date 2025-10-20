@@ -23,6 +23,7 @@ DELE.TO is a modern, secure platform for sharing sensitive information like pass
 - [🏗️ Architecture Overview](#️-architecture-overview)
 - [🔐 Encryption & Decryption Process](#-encryption--decryption-process)
 - [🔄 Data Flow Example](#data-flow-example)
+- [🌍 Internationalization](#-internationalization)
 - [🧪 Testing](#-testing)
 - [🛠️ Tech Stack](#️-tech-stack)
 - [📁 Project Structure](#-project-structure)
@@ -39,6 +40,7 @@ DELE.TO is a modern, secure platform for sharing sensitive information like pass
 - 🌐 **URL fragment keys** - Encryption keys never sent to server
 - 💾 **Redis storage** - Encrypted data with automatic TTL cleanup
 - 📱 **Responsive design** - Works on all devices
+- 🌍 **Multi-language support** - Available in 5 languages with 600+ translations
 
 ## 📸 Screenshots
 
@@ -318,7 +320,53 @@ Let's trace what happens when you encrypt "my secret password":
 ```
  </details>
 
+## 🌍 Internationalization
 
+DELE.TO is fully internationalized with comprehensive multi-language support across all pages and components.
+
+### 🗣️ Supported Languages
+
+| Language | Code | Status | Coverage |
+|----------|------|--------|----------|
+| 🇬🇧 **English** | `en` | ✅ Complete | 600+ keys |
+| 🇦🇱 **Albanian** | `sq` | ✅ Complete | 600+ keys |
+| 🇪🇸 **Spanish** | `es` | ✅ Complete | 600+ keys |
+| 🇫🇷 **French** | `fr` | ✅ Complete | 600+ keys |
+| 🇩🇪 **German** | `de` | ✅ Complete | 600+ keys |
+
+### 📱 Internationalized Components
+
+#### ✅ **Fully Translated Pages**
+- **🏠 Landing Page** - Features, how it works, security tips
+- **📝 Create Page** - Form labels, validation, multi-recipient functionality
+- **👁️ View Page** - Password protection, error messages, access tips
+- **ℹ️ About Page** - Technical details, security explanations, best practices
+- **🔄 Alternatives Page** - Tool comparisons, feature matrices, use cases
+- **⚖️ VS Comparison Pages** - Individual tool comparisons (Yopass, PasswordPusher, PrivateBin, OneTimeSecret)
+
+#### ✅ **Translated Components**
+- **🧭 Navigation** - All menu items and buttons
+- **🔒 Security Tips** - Best practices and guidance
+- **⚠️ Error Messages** - User-friendly error handling
+- **📋 Footer** - Links and legal information
+- **📱 PWA Install Prompts** - Mobile installation guidance
+
+### 🌐 Language Detection & Switching
+
+- **🔍 Auto-detection** - Automatically detects browser language preference
+- **🔗 URL Parameters** - Support for `?lang=sq`, `?lang=es`, etc.
+- **💾 Persistence** - Language preference saved in localStorage
+- **🎯 Fallback** - Graceful fallback to English for missing translations
+
+
+### 🚀 Adding New Languages
+
+To add a new language:
+
+1. **Create language file**: `/lib/i18n/locales/[code].ts`
+2. **Implement TranslationKeys interface**: All 600+ keys required
+3. **Add to exports**: Update `/lib/i18n/locales/index.ts`
+4. **Test thoroughly**: Ensure all pages render correctly
 
 ## 🧪 Testing
 
@@ -388,6 +436,7 @@ pnpm build
 - **UI Components**: Radix UI + shadcn/ui
 - **Database**: Redis (Upstash) with file system fallback
 - **Encryption**: Web Crypto API (AES-256-GCM)
+- **Internationalization**: react-i18next with 5 languages (600+ keys each)
 - **Icons**: Lucide React
 - **Fonts**: Geist Sans & Geist Mono
 
@@ -431,6 +480,10 @@ secure-share-v2/
 │   ├── use-mobile.tsx
 │   └── use-toast.ts
 ├── lib/                       # Utility libraries
+│   ├── i18n/                  # Internationalization
+│   │   ├── locales/           # Translation files (en, sq, es, fr, de)
+│   │   ├── types.ts           # Translation type definitions
+│   │   └── server.ts          # Server-side translation helper
 │   ├── crypto.ts              # Encryption utilities
 │   ├── farcaster.ts
 │   └── utils.ts

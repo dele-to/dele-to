@@ -6,8 +6,10 @@ import { Flame, Clock, Lock, Key, Server } from "lucide-react"
 import Link from "next/link"
 import { SecurityTips } from "@/components/security-tips"
 import { FarcasterReady } from "@/components/farcaster-ready"
+import { useTranslation } from "react-i18next"
 
 export default function MiniAppPage() {
+    const { t } = useTranslation();
 
     return (
         <>
@@ -129,9 +131,9 @@ export default function MiniAppPage() {
                                         4
                                     </div>
                                     <div>
-                                        <h4 className="font-semibold">Client-Side Decryption</h4>
+                                        <h4 className="font-semibold">{t('landing.howItWorks.step4.title')}</h4>
                                         <p className="text-gray-600">
-                                            Recipient's browser decrypts the data locally - server never sees plaintext
+                                            {t('landing.howItWorks.step4.description')}
                                         </p>
                                     </div>
                                 </div>

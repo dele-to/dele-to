@@ -1,90 +1,83 @@
+"use client"
+
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Check, X, Flame, ArrowLeft } from "lucide-react"
 import Link from "next/link"
-import type { Metadata } from 'next'
-
-export const metadata: Metadata = {
-  title: 'DELE.TO - Alternative to Yopass for Secure Password Sharing',
-  description: 'DELE.TO is a modern alternative to Yopass with zero-knowledge encryption, password protection, and mobile-first design. Compare features and security.',
-  openGraph: {
-    title: 'DELE.TO - Alternative to Yopass for Secure Password Sharing',
-    description: 'Modern alternative to Yopass with zero-knowledge encryption, password protection, and superior user experience.',
-    images: ['/SEO.png'],
-  },
-}
-
-const comparisonData = [
-  {
-    feature: "Client-Side Encryption",
-    deleto: true,
-    yopass: true,
-    details: "Both use AES-256 encryption in the browser"
-  },
-  {
-    feature: "Zero-Knowledge Architecture",
-    deleto: true,
-    yopass: true,
-    details: "Neither service can access your data"
-  },
-  {
-    feature: "Custom Expiration Times",
-    deleto: true,
-    yopass: true,
-    details: "Both offer flexible expiration settings"
-  },
-  {
-    feature: "View Count Limits",
-    deleto: true,
-    yopass: true,
-    details: "Burn-after-reading functionality"
-  },
-  {
-    feature: "Password Protection",
-    deleto: true,
-    yopass: false,
-    details: "DELE.TO adds optional password layer"
-  },
-  {
-    feature: "Modern UI/UX",
-    deleto: true,
-    yopass: false,
-    details: "DELE.TO has more polished interface"
-  },
-  {
-    feature: "Mobile Responsive",
-    deleto: true,
-    yopass: "partial",
-    details: "DELE.TO fully optimized for mobile"
-  },
-  {
-    feature: "File Sharing",
-    deleto: "coming-soon",
-    yopass: true,
-    details: "Yopass supports file uploads, DELE.TO coming soon"
-  },
-  {
-    feature: "Self-Hosted Option",
-    deleto: true,
-    yopass: true,
-    details: "Yopass available now, DELE.TO coming soon"
-  },
-  {
-    feature: "Open Source",
-    deleto: true,
-    yopass: true,
-    details: "Both are open source projects"
-  },
-  {
-    feature: "Multi-Recipient Sharing",
-    deleto: true,
-    yopass: false,
-    details: "DELE.TO supports sharing to multiple recipients"
-  }
-]
+import { useTranslation } from "react-i18next"
 
 export default function YopassComparison() {
+  const { t } = useTranslation()
+
+  const getComparisonData = () => [
+    {
+      feature: t('vs.common.clientSideEncryption'),
+      deleto: true,
+      yopass: true,
+      details: "Both use AES-256 encryption in the browser"
+    },
+    {
+      feature: t('vs.common.zeroKnowledgeArchitecture'),
+      deleto: true,
+      yopass: true,
+      details: "Neither service can access your data"
+    },
+    {
+      feature: t('vs.common.customExpirationTimes'),
+      deleto: true,
+      yopass: true,
+      details: "Both offer flexible expiration settings"
+    },
+    {
+      feature: t('vs.common.viewCountLimits'),
+      deleto: true,
+      yopass: true,
+      details: "Burn-after-reading functionality"
+    },
+    {
+      feature: t('vs.common.passwordProtection'),
+      deleto: true,
+      yopass: false,
+      details: "DELE.TO adds optional password layer"
+    },
+    {
+      feature: t('vs.common.modernUiUx'),
+      deleto: true,
+      yopass: false,
+      details: "DELE.TO has more polished interface"
+    },
+    {
+      feature: t('vs.common.mobileOptimized'),
+      deleto: true,
+      yopass: "partial",
+      details: "DELE.TO fully optimized for mobile"
+    },
+    {
+      feature: t('vs.common.fileSharing'),
+      deleto: "coming-soon",
+      yopass: true,
+      details: "Yopass supports file uploads, DELE.TO coming soon"
+    },
+    {
+      feature: t('vs.common.selfHosted'),
+      deleto: true,
+      yopass: true,
+      details: "Yopass available now, DELE.TO coming soon"
+    },
+    {
+      feature: t('vs.common.openSource'),
+      deleto: true,
+      yopass: true,
+      details: "Both are open source projects"
+    },
+    {
+      feature: t('vs.common.multiRecipientSharing'),
+      deleto: true,
+      yopass: false,
+      details: "DELE.TO supports sharing to multiple recipients"
+    }
+  ]
   return (
     <div className="min-h-screen">
       <div className="container mx-auto px-4 py-8">
@@ -92,7 +85,7 @@ export default function YopassComparison() {
           <Link href="/">
             <Button variant="ghost">
               <ArrowLeft className="w-4 h-4 mr-2" />
-              Back to Home
+              {t('vs.common.backToAlternatives')}
             </Button>
           </Link>
         </div>
@@ -101,11 +94,10 @@ export default function YopassComparison() {
           {/* Header */}
           <div className="text-center mb-12">
             <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">
-              DELE.TO - Alternative to Yopass
+              {t('vs.yopass.title')}
             </h1>
             <p className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
-              Comparing two popular secure password sharing solutions. Both offer client-side encryption, 
-              but which one is right for your needs?
+              {t('vs.yopass.subtitle')}
             </p>
           </div>
 
@@ -181,7 +173,7 @@ export default function YopassComparison() {
           {/* Detailed Comparison Table */}
           <Card className="mb-12">
             <CardHeader>
-              <CardTitle>Feature Comparison</CardTitle>
+              <CardTitle>{t('vs.common.comparison')}</CardTitle>
               <CardDescription>
                 Side-by-side comparison of key features and capabilities
               </CardDescription>
@@ -191,14 +183,14 @@ export default function YopassComparison() {
                 <table className="w-full">
                   <thead>
                     <tr className="border-b">
-                      <th className="text-left py-3 px-4 font-medium">Feature</th>
+                      <th className="text-left py-3 px-4 font-medium">{t('vs.common.features')}</th>
                       <th className="text-center py-3 px-4 font-medium">DELE.TO</th>
                       <th className="text-center py-3 px-4 font-medium">Yopass</th>
                       <th className="text-left py-3 px-4 font-medium">Details</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {comparisonData.map((item, index) => (
+                    {getComparisonData().map((item: any, index: number) => (
                       <tr key={index} className="border-b hover:bg-gray-50 dark:hover:bg-gray-800">
                         <td className="py-3 px-4 font-medium">{item.feature}</td>
                         <td className="py-3 px-4 text-center">
@@ -207,7 +199,7 @@ export default function YopassComparison() {
                           ) : item.deleto === false ? (
                             <X className="w-5 h-5 text-red-500 mx-auto" />
                           ) : item.deleto === "coming-soon" ? (
-                            <span className="text-sm text-amber-600 font-medium">Soon</span>
+                            <span className="text-sm text-amber-600 font-medium">{t('alternatives.soon')}</span>
                           ) : (
                             <span className="text-sm text-yellow-600">{item.deleto}</span>
                           )}
@@ -234,29 +226,29 @@ export default function YopassComparison() {
           <div className="grid md:grid-cols-2 gap-8 mb-12">
             <Card>
               <CardHeader>
-                <CardTitle style={{ color: '#D2461E' }}>Choose DELE.TO if you:</CardTitle>
+                <CardTitle style={{ color: '#D2461E' }}>{t('vs.common.chooseDeletoIf')}</CardTitle>
               </CardHeader>
               <CardContent>
                 <ul className="space-y-2 text-sm">
                   <li className="flex items-start gap-2">
                     <Check className="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" />
-                    <span>Want a modern, polished user interface</span>
+                    <span>{t('vs.common.useCases.modernInterface')}</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <Check className="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" />
-                    <span>Need optional password protection</span>
+                    <span>{t('vs.common.useCases.passwordProtectionNeeded')}</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <Check className="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" />
-                    <span>Share text-based credentials (file sharing coming soon)</span>
+                    <span>{t('vs.common.useCases.textCredentials')}</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <Check className="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" />
-                    <span>Value mobile-first design</span>
+                    <span>{t('vs.common.useCases.mobileFirst')}</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <Check className="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" />
-                    <span>Want built-in security tips and guidance</span>
+                    <span>{t('vs.common.useCases.securityGuidance')}</span>
                   </li>
                 </ul>
               </CardContent>
@@ -264,29 +256,29 @@ export default function YopassComparison() {
 
             <Card>
               <CardHeader>
-                <CardTitle className="text-blue-600">Choose Yopass if you:</CardTitle>
+                <CardTitle className="text-blue-600">{t('vs.common.chooseAlternativeIf', { tool: 'Yopass' })}</CardTitle>
               </CardHeader>
               <CardContent>
                 <ul className="space-y-2 text-sm">
                   <li className="flex items-start gap-2">
                     <Check className="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" />
-                    <span>Need to share files along with passwords</span>
+                    <span>{t('vs.common.useCases.fileSharing')}</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <Check className="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" />
-                    <span>Prefer established, battle-tested solutions</span>
+                    <span>{t('vs.common.useCases.battleTested')}</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <Check className="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" />
-                    <span>Don't need additional password protection</span>
+                    <span>{t('vs.common.useCases.noPasswordProtection')}</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <Check className="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" />
-                    <span>Want a minimalist approach</span>
+                    <span>{t('vs.common.useCases.minimalistInterface')}</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <Check className="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" />
-                    <span>Have existing workflows with Yopass</span>
+                    <span>{t('vs.common.useCases.existingWorkflows')}</span>
                   </li>
                 </ul>
               </CardContent>
@@ -296,31 +288,31 @@ export default function YopassComparison() {
           {/* Security Comparison */}
           <Card className="mb-12">
             <CardHeader>
-              <CardTitle>Security Analysis</CardTitle>
+              <CardTitle>{t('vs.common.securityAnalysis.title')}</CardTitle>
               <CardDescription>
-                Both solutions offer strong security, but with different approaches
+                {t('vs.common.securityAnalysis.subtitle')}
               </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="grid md:grid-cols-2 gap-6">
                 <div>
-                  <h4 className="font-semibold mb-3" style={{ color: '#D2461E' }}>DELE.TO Security</h4>
+                  <h4 className="font-semibold mb-3" style={{ color: '#D2461E' }}>{t('vs.common.securityAnalysis.deletoSecurity')}</h4>
                   <ul className="space-y-2 text-sm text-gray-600">
-                    <li>• AES-256-GCM client-side encryption</li>
-                    <li>• Keys in URL fragments (never sent to server)</li>
-                    <li>• Optional password protection layer</li>
-                    <li>• Built-in security tips and best practices</li>
-                    <li>• Redis TTL for automatic cleanup</li>
+                    <li>• {t('vs.common.securityAnalysis.deletoFeatures.aes256Gcm')}</li>
+                    <li>• {t('vs.common.securityAnalysis.deletoFeatures.urlFragments')}</li>
+                    <li>• {t('vs.common.securityAnalysis.deletoFeatures.passwordProtection')}</li>
+                    <li>• {t('vs.common.securityAnalysis.deletoFeatures.securityTips')}</li>
+                    <li>• {t('vs.common.securityAnalysis.deletoFeatures.redisTtl')}</li>
                   </ul>
                 </div>
                 <div>
-                  <h4 className="font-semibold mb-3 text-blue-600">Yopass Security</h4>
+                  <h4 className="font-semibold mb-3 text-blue-600">{t('vs.common.securityAnalysis.yopassSecurity')}</h4>
                   <ul className="space-y-2 text-sm text-gray-600">
-                    <li>• AES-256 client-side encryption</li>
-                    <li>• Zero-knowledge architecture</li>
-                    <li>• Proven track record and audits</li>
-                    <li>• File encryption capabilities</li>
-                    <li>• Multiple backend storage options</li>
+                    <li>• {t('vs.common.securityAnalysis.yopassFeatures.aes256')}</li>
+                    <li>• {t('vs.common.securityAnalysis.yopassFeatures.zeroKnowledge')}</li>
+                    <li>• {t('vs.common.securityAnalysis.yopassFeatures.provenTrack')}</li>
+                    <li>• {t('vs.common.securityAnalysis.yopassFeatures.fileEncryption')}</li>
+                    <li>• {t('vs.common.securityAnalysis.yopassFeatures.multipleBackends')}</li>
                   </ul>
                 </div>
               </div>
@@ -330,24 +322,24 @@ export default function YopassComparison() {
           {/* Final Recommendation */}
           <Card>
             <CardHeader>
-              <CardTitle>Our Recommendation</CardTitle>
+              <CardTitle>{t('vs.common.recommendation.title')}</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
                 <p className="text-gray-600">
-                  Both DELE.TO and Yopass are excellent choices for secure password sharing. Your choice depends on your specific needs:
+                  {t('vs.common.recommendation.intro')}
                 </p>
                 <div className="grid md:grid-cols-2 gap-6">
                   <div className="p-4 rounded-lg" style={{ backgroundColor: '#FDF2F2', borderColor: '#D2461E', borderWidth: '1px' }}>
-                    <h4 className="font-semibold mb-2" style={{ color: '#8B1A00' }}>For Modern Teams</h4>
+                    <h4 className="font-semibold mb-2" style={{ color: '#8B1A00' }}>{t('vs.common.recommendation.forModernTeams')}</h4>
                     <p className="text-sm" style={{ color: '#B91C1C' }}>
-                      Choose DELE.TO for its polished interface, mobile optimization, and additional security features like password protection.
+                      {t('vs.common.recommendation.forModernTeamsDesc')}
                     </p>
                   </div>
                   <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                    <h4 className="font-semibold mb-2 text-blue-900">For File Sharing</h4>
+                    <h4 className="font-semibold mb-2 text-blue-900">{t('vs.common.recommendation.forFileSharing')}</h4>
                     <p className="text-sm text-blue-800">
-                      Choose Yopass if you need to share files along with passwords or prefer a more established solution.
+                      {t('vs.common.recommendation.forFileSharingDesc')}
                     </p>
                   </div>
                 </div>
@@ -358,7 +350,7 @@ export default function YopassComparison() {
           <div className="text-center mt-12">
             <Link href="/create">
               <Button size="lg" style={{ backgroundColor: '#D2461E' }} className="text-white hover:opacity-90">
-                Try DELE.TO Now
+                {t('vs.common.recommendation.tryNow')}
               </Button>
             </Link>
           </div>
