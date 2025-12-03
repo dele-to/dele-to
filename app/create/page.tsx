@@ -14,7 +14,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Badge } from "@/components/ui/badge"
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
-import { Copy, Shield, ArrowLeft, Key, RefreshCw, AlertTriangle, Link2, QrCode, Plus, Trash2, Users, User, X, Tag, Mail, Send, ChevronDown, Settings, Crown } from "lucide-react"
+import { Copy, Shield, ArrowLeft, Key, RefreshCw, AlertTriangle, Link2, QrCode, Plus, Trash2, Users, User, X, Tag, ChevronDown, Settings, Crown } from "lucide-react"
 import Link from "next/link"
 import { createSecureShare } from "../actions/share"
 import { SecureCrypto } from "../../lib/crypto"
@@ -27,7 +27,6 @@ import { Header } from "@/components/header"
 interface Recipient {
   id: string
   name: string
-  email?: string
   expirationTime: string
   maxViews: number
   requirePassword: boolean
@@ -37,15 +36,11 @@ interface Recipient {
 interface GeneratedLink {
   recipientId: string
   recipientName: string
-  recipientEmail?: string
   shareId: string
   shareLink: string
   expirationTime: string
   maxViews: number
   requirePassword: boolean
-  emailToken?: string
-  emailSent?: boolean
-  emailError?: string
 }
 
 export default function CreatePage() {
@@ -58,7 +53,6 @@ export default function CreatePage() {
   
   // Single recipient settings (when multiRecipient is false)
   const [singleRecipientSettings, setSingleRecipientSettings] = useState({
-    email: "",
     expirationTime: "1h",
     maxViews: 1,
     requirePassword: false,
@@ -91,7 +85,6 @@ export default function CreatePage() {
     const newRecipient: Recipient = {
       id: crypto.randomUUID(),
       name: newRecipientName.trim(),
-      email: "",
       expirationTime: "1h",
       maxViews: 1,
       requirePassword: false,
@@ -178,7 +171,6 @@ export default function CreatePage() {
 
         if (result.success && result.id) {
           const shareId = result.id
-          const emailToken = result.emailToken
           
           // Immediate verification
           setTimeout(async () => {
@@ -196,13 +188,11 @@ export default function CreatePage() {
           links.push({
             recipientId: recipient.id,
             recipientName: recipient.name,
-            recipientEmail: recipient.email,
             shareId,
             shareLink: shareUrl,
             expirationTime: recipient.expirationTime,
             maxViews: recipient.maxViews,
             requirePassword: recipient.requirePassword,
-            emailToken,
           })
         } else {
           setError(result.error || `Failed to create secure share for ${recipient.name}`)
@@ -223,59 +213,6 @@ export default function CreatePage() {
     await navigator.clipboard.writeText(link)
     setCopiedLinkId(linkId)
     setTimeout(() => setCopiedLinkId(null), 2000)
-  }
-
-  const sendEmail = async (linkIndex: number) => {
-    const link = generatedLinks[linkIndex]
-    if (!link.recipientEmail) return
-
-    try {
-      // Get expiration date from the share
-      const expiresAt = new Date()
-      switch (link.expirationTime) {
-        case "15m":
-          expiresAt.setMinutes(expiresAt.getMinutes() + 15)
-          break
-        case "1h":
-          expiresAt.setHours(expiresAt.getHours() + 1)
-          break
-        case "24h":
-          expiresAt.setHours(expiresAt.getHours() + 24)
-          break
-        case "7d":
-          expiresAt.setDate(expiresAt.getDate() + 7)
-          break
-        default:
-          expiresAt.setHours(expiresAt.getHours() + 1)
-      }
-
-      // Call server action directly (no API route needed)
-      const result = await sendSecureShareEmail({
-        to: link.recipientEmail,
-        recipientName: link.recipientName,
-        shareLink: link.shareLink,
-        title: formData.title,
-        expiresAt: expiresAt.toISOString(),
-        maxViews: link.maxViews,
-        emailToken: link.emailToken || '',
-      })
-
-      // Update the link status
-      const updatedLinks = [...generatedLinks]
-      if (result.success) {
-        updatedLinks[linkIndex] = { ...link, emailSent: true }
-      } else {
-        updatedLinks[linkIndex] = { ...link, emailError: result.error }
-      }
-      setGeneratedLinks(updatedLinks)
-    } catch (error) {
-      const updatedLinks = [...generatedLinks]
-      updatedLinks[linkIndex] = { 
-        ...link, 
-        emailError: error instanceof Error ? error.message : 'Failed to send email' 
-      }
-      setGeneratedLinks(updatedLinks)
-    }
   }
 
   const openQrModal = (link: string, title: string) => {
@@ -332,39 +269,6 @@ export default function CreatePage() {
                         </CardDescription>
                       </CardHeader>
                       <CardContent className="pt-0 space-y-2">
-                        {link.recipientEmail && (
-                          <div className="flex gap-2 items-center">
-                            <Mail className="w-4 h-4 text-gray-500" />
-                            <Input 
-                              value={link.recipientEmail} 
-                              readOnly 
-                              className="text-xs flex-1" 
-                            />
-                            <Button 
-                              onClick={() => sendEmail(generatedLinks.indexOf(link))} 
-                              variant={link.emailSent ? "default" : "outline"}
-                              size="sm"
-                              disabled={link.emailSent}
-                            >
-                              {link.emailSent ? (
-                                <>
-                                  <Send className="w-4 h-4 mr-1" />
-                                  Sent
-                                </>
-                              ) : (
-                                <>
-                                  <Send className="w-4 h-4 mr-1" />
-                                  Send
-                                </>
-                              )}
-                            </Button>
-                          </div>
-                        )}
-                        {link.emailError && (
-                          <Alert variant="destructive" className="py-2">
-                            <AlertDescription className="text-xs">{link.emailError}</AlertDescription>
-                          </Alert>
-                        )}
                         <div className="flex gap-2">
                           <Input 
                             value={link.shareLink} 
@@ -395,41 +299,6 @@ export default function CreatePage() {
                 </div>
               ) : (
                 <div className="space-y-3">
-                  {generatedLinks[0].recipientEmail && (
-                    <div>
-                      <Label htmlFor="recipient-email">Recipient Email</Label>
-                      <div className="flex gap-2 mt-2">
-                        <Input 
-                          id="recipient-email" 
-                          value={generatedLinks[0].recipientEmail} 
-                          readOnly 
-                          className="text-sm" 
-                        />
-                        <Button 
-                          onClick={() => sendEmail(0)} 
-                          variant={generatedLinks[0].emailSent ? "default" : "outline"}
-                          disabled={generatedLinks[0].emailSent}
-                        >
-                          {generatedLinks[0].emailSent ? (
-                            <>
-                              <Send className="w-4 h-4 mr-2" />
-                              Sent
-                            </>
-                          ) : (
-                            <>
-                              <Send className="w-4 h-4 mr-2" />
-                              Send Email
-                            </>
-                          )}
-                        </Button>
-                      </div>
-                      {generatedLinks[0].emailError && (
-                        <Alert variant="destructive" className="mt-2">
-                          <AlertDescription>{generatedLinks[0].emailError}</AlertDescription>
-                        </Alert>
-                      )}
-                    </div>
-                  )}
                   <div>
                     <Label htmlFor="share-link">Secure Share Link</Label>
                     <div className="flex gap-2 mt-2">
@@ -482,7 +351,6 @@ export default function CreatePage() {
                       multiRecipient: false,
                     })
                     setSingleRecipientSettings({
-                      email: "",
                       expirationTime: "1h",
                       maxViews: 1,
                       requirePassword: false,
@@ -638,8 +506,8 @@ export default function CreatePage() {
                       <Settings className="w-4 h-4" />
                       <div className="text-left">
                         <span>Advanced Settings</span>
-                        <p className="text-xs text-gray-500 mt-1 hidden md:block">Multi-recipient, email delivery, notifications & more</p>
-                        <p className="text-xs text-gray-500 mt-1 md:hidden">Multi-recipient and email delivery</p>
+                        <p className="text-xs text-gray-500 mt-1 hidden md:block">Multi-recipient, access controls & more</p>
+                        <p className="text-xs text-gray-500 mt-1 md:hidden">Multi-recipient and access controls</p>
                       </div>
                     </div>
                     <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${isAdvancedSettingsOpen ? 'rotate-180' : ''}`} />
@@ -714,20 +582,6 @@ export default function CreatePage() {
                               </Button>
                             </div>
                             
-                            <div className="mb-3">
-                              <Label className="text-sm flex items-center gap-1">
-                                <Mail className="w-3 h-3" />
-                                Email (Optional)
-                              </Label>
-                              <Input
-                                type="email"
-                                placeholder="recipient@example.com"
-                                value={recipient.email || ""}
-                                onChange={(e) => updateRecipient(recipient.id, { email: e.target.value })}
-                                className="h-8 mt-1"
-                              />
-                              <p className="text-xs text-gray-500 mt-1">Send the link directly via email</p>
-                            </div>
                             
                             <div className="grid grid-cols-2 gap-3 mb-3">
                               <div>
