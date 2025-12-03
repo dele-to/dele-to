@@ -1,153 +1,128 @@
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Flame, Clock, Lock, Key, Server } from "lucide-react"
-import Link from "next/link"
-import { SecurityTips } from "@/components/security-tips"
-import { ThemeToggle } from "@/components/theme-toggle"
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Lock, Eye, ArrowRight, Sparkles, Shield, Clock, Database, Zap, Github } from 'lucide-react'
+import Link from 'next/link'
 
 export default function HomePage() {
   return (
-    <div className="min-h-screen">
-      <div className="fixed top-4 right-4 z-50">
-        <ThemeToggle />
-      </div>
-      <div className="container mx-auto px-4 py-16">
-        <div className="text-center mb-16">
-          <div className="flex justify-center mb-6">
-            <div className="p-3 rounded-full bg-orange-600">
-              <Flame className="w-8 h-8 text-white" />
-            </div>
-          </div>
-          <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-2">DELE.TO</h1>
-          <p className="text-sm text-gray-500 dark:text-gray-400 italic mb-6">From Latin dēlētō — “erase, destroy.”</p>
-          <p className="text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto mb-8">
-            Share sensitive credentials and secrets securely with client-side AES-256 encryption, zero-knowledge
-            architecture, and automatic self-destruction.
+    <div className="min-h-screen bg-background text-foreground overflow-x-hidden">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        <div className="text-center max-w-4xl mx-auto">
+          <Link href="https://github.com/ardd/dele-to-deployed" target="_blank" rel="noopener noreferrer">
+            <span className="inline-flex items-center rounded-full bg-red-100 dark:bg-red-900/30 px-3 py-1 text-xs font-medium text-red-800 dark:text-red-300 ring-1 ring-inset ring-red-200 dark:ring-red-800 mb-6 hover:bg-red-200 dark:hover:bg-red-900/40 transition-colors">
+              <Sparkles className="h-3 w-3 mr-1" /> Open source & zero-knowledge
+            </span>
+          </Link>
+          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight mb-6 leading-tight">
+            Share secrets
+            <br />
+            that <span className="text-red-600 dark:text-red-500 animate-disappear">disappear</span>
+          </h1>
+          <p className="text-lg text-muted-foreground mb-10 max-w-2xl mx-auto hidden md:block">
+            Stop sharing passwords in Slack. DELE.TO encrypts everything in your browser.
+            <br />Your secrets self-destruct after reading. No traces, no logs, no worries.
           </p>
-          <div className="flex gap-4 justify-center">
-            <Link href="/create">
-              <Button size="lg" className="hover:opacity-90 text-white bg-red-600">
-                Share Securely
-              </Button>
-            </Link>
-            <Link href="/about">
-              <Button variant="outline" size="lg">
-                Learn More
-              </Button>
-            </Link>
+          <div className="flex flex-col md:flex-row justify-center items-center space-y-4 md:space-y-0 md:space-x-4 mb-12">
+            <Button asChild className="bg-red-600 hover:bg-red-700 text-white px-6 py-3 text-lg rounded-lg transition-all duration-300 transform hover:scale-90w-auto">
+              <Link href="/create">
+                Create a secret <ArrowRight className="ml-2 h-5 w-5" />
+              </Link>
+            </Button>
+            <Button asChild variant="outline" className="border-gray-600 text-gray-300 hover:bg-gray-800 px-6 py-3 text-lg rounded-lg transition-all duration-300 transform hover:scale-90w-auto">
+              <Link href="/about">
+                Learn more
+              </Link>
+            </Button>
+          </div>
+          <div className="flex flex-col md:flex-row justify-center items-center space-y-2 md:space-y-0 md:space-x-8 text-muted-foreground text-sm">
+            <span className="flex items-center">
+              <Lock className="h-4 w-4 mr-2" /> AES-256 encrypted
+            </span>
+            <span className="flex items-center">
+              <Eye className="h-4 w-4 mr-2" /> Zero-knowledge
+            </span>
           </div>
         </div>
 
-        <div className="max-w-4xl mx-auto mb-8">
-          <SecurityTips />
-        </div>
-
-        <div className="grid md:grid-cols-3 gap-8 max-w-4xl mx-auto">
-          <Card>
+        {/* Security without compromise section */}
+        <div className="w-full max-w-6xl mx-auto mt-24 px-4 sm:px-6 lg:px-8 pb-16">
+          {/* <div className="text-center mb-12">
+            <h2 className="text-2xl sm:text-3xl font-bold text-foreground mb-4">Security without compromise</h2>
+          </div> */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 overflow-x-hidden">
+          <Card className="bg-card border-border transition-all duration-300 hover:shadow-lg hover:scale-90hover:border-2 hover:border-red-500 dark:hover:border-red-400">
             <CardHeader>
-              <div className="p-2 bg-green-100 rounded-lg w-fit">
-                <Lock className="w-6 h-6 text-green-600" />
-              </div>
-              <CardTitle>Client-Side AES-256</CardTitle>
-              <CardDescription>
-                Your data is encrypted with AES-256-GCM in your browser before it ever leaves your device
-              </CardDescription>
+              <Shield className="w-8 h-8 mb-2 text-white" />
+              <CardTitle className="text-lg">Military-grade encryption</CardTitle>
             </CardHeader>
+            <CardContent>
+              <CardDescription className="text-muted-foreground">
+                Your data is encrypted with AES-256-GCM right in your browser. We never see the plaintext.
+              </CardDescription>
+            </CardContent>
           </Card>
 
-          <Card>
+          <Card className="bg-card border-border transition-all duration-300 hover:shadow-lg hover:scale-90hover:border-2 hover:border-red-500 dark:hover:border-red-400">
             <CardHeader>
-              <div className="p-2 bg-orange-100 rounded-lg w-fit">
-                <Clock className="w-6 h-6 text-orange-600" />
-              </div>
-              <CardTitle>Auto-Expiration</CardTitle>
-              <CardDescription>
-                Set custom expiration times or view limits with automatic destruction in Redis
-              </CardDescription>
+              <Clock className="w-8 h-8 mb-2 text-white" />
+              <CardTitle className="text-lg">Self-destructing messages</CardTitle>
             </CardHeader>
+            <CardContent>
+              <CardDescription className="text-muted-foreground">
+                Set custom expiration times or view limits. Once read, it's gone forever.
+              </CardDescription>
+            </CardContent>
           </Card>
 
-          <Card>
+          <Card className="bg-card border-border transition-all duration-300 hover:shadow-lg hover:scale-90hover:border-2 hover:border-red-500 dark:hover:border-red-400">
             <CardHeader>
-              <div className="p-2 bg-purple-100 rounded-lg w-fit">
-                <Key className="w-6 h-6 text-purple-600" />
-              </div>
-              <CardTitle>Zero-Knowledge</CardTitle>
-              <CardDescription>
-                Encryption keys are never sent to our servers - they're embedded in the URL fragment
+              <Eye className="w-8 h-8 mb-2 text-white" />
+              <CardTitle className="text-lg">Zero-knowledge architecture</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <CardDescription className="text-muted-foreground">
+                Encryption keys live in the URL fragment—they never touch our servers.
               </CardDescription>
-            </CardHeader>
+            </CardContent>
           </Card>
-        </div>
 
-        <div className="mt-16">
-          <Card className="max-w-2xl mx-auto">
+          <Card className="bg-card border-border transition-all duration-300 hover:shadow-lg hover:scale-90hover:border-2 hover:border-red-500 dark:hover:border-red-400">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Server className="w-6 h-6" />
-                How It Works
-              </CardTitle>
+              <Database className="w-8 h-8 mb-2 text-white" />
+              <CardTitle className="text-lg">No data retention</CardTitle>
             </CardHeader>
-            <CardContent className="text-left space-y-4">
-              <div className="flex items-start gap-3">
-                <div className="w-6 h-6 text-white rounded-full flex items-center justify-center text-sm font-bold bg-orange-600">
-                  1
-                </div>
-                <div>
-                  <h4 className="font-semibold">Client-Side Encryption</h4>
-                  <p className="text-gray-600 dark:text-gray-300">
-                    AES-256 key is generated in your browser and your data is encrypted locally
-                  </p>
-                </div>
-              </div>
-              <div className="flex items-start gap-3">
-                <div className="w-6 h-6 text-white rounded-full flex items-center justify-center text-sm font-bold bg-orange-600">
-                  2
-                </div>
-                <div>
-                  <h4 className="font-semibold">Secure Storage</h4>
-                  <p className="text-gray-600 dark:text-gray-300">
-                    Only encrypted data is stored in Redis with automatic expiration - no keys stored
-                  </p>
-                </div>
-              </div>
-              <div className="flex items-start gap-3">
-                <div className="w-6 h-6 text-white rounded-full flex items-center justify-center text-sm font-bold bg-orange-600">
-                  3
-                </div>
-                <div>
-                  <h4 className="font-semibold">Key in URL Fragment</h4>
-                  <p className="text-gray-600 dark:text-gray-300">
-                    Decryption key is embedded in URL fragment (#) and never sent to our servers
-                  </p>
-                </div>
-              </div>
-              <div className="flex items-start gap-3">
-                <div className="w-6 h-6 text-white rounded-full flex items-center justify-center text-sm font-bold bg-orange-600">
-                  4
-                </div>
-                <div>
-                  <h4 className="font-semibold">Client-Side Decryption</h4>
-                  <p className="text-gray-600 dark:text-gray-300">
-                    Recipient's browser decrypts the data locally - server never sees plaintext
-                  </p>
-                </div>
-              </div>
+            <CardContent>
+              <CardDescription className="text-muted-foreground">
+                We don't log IPs, don't track users, and can't read your secrets even if we tried.
+              </CardDescription>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-card border-border transition-all duration-300 hover:shadow-lg hover:scale-90hover:border-2 hover:border-red-500 dark:hover:border-red-400">
+            <CardHeader>
+              <Zap className="w-8 h-8 mb-2 text-white" />
+              <CardTitle className="text-lg">Instant sharing</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <CardDescription className="text-muted-foreground">
+                No signup required for basic use. Create and share in seconds.
+              </CardDescription>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-card border-border transition-all duration-300 hover:shadow-lg hover:scale-90hover:border-2 hover:border-red-500 dark:hover:border-red-400">
+            <CardHeader>
+              <Github className="w-8 h-8 mb-2 text-white" />
+              <CardTitle className="text-lg">Open source</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <CardDescription className="text-muted-foreground">
+                Fully auditable code on GitHub. Trust is earned through transparency.
+              </CardDescription>
             </CardContent>
           </Card>
         </div>
-
-        <div className="mt-16 text-center">
-          <div className="rounded-lg p-6 max-w-2xl mx-auto bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800">
-            <h3 className="text-lg font-semibold mb-2 text-red-900 dark:text-red-200">Zero-Knowledge Architecture</h3>
-            <p className="text-red-800 dark:text-red-300">
-              We never have access to your encryption keys or plaintext data. Everything is encrypted/decrypted in your
-              browser using the Web Crypto API.
-            </p>
-          </div>
         </div>
-
-
       </div>
     </div>
   )
