@@ -95,19 +95,19 @@ export function SecurityTips() {
   }
 
   return (
-    <Alert className="mb-6 border-orange-600 bg-orange-50 dark:border-orange-400 dark:bg-orange-950/20">
-      <div className="flex items-start gap-3">
-        <Lightbulb className="h-5 w-5 mt-0.5 flex-shrink-0 text-orange-600 dark:text-orange-400" />
+    <Alert className="mb-4 border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 py-3">
+      <div className="flex items-start gap-2">
+        <Lightbulb className="h-4 w-4 mt-0.5 flex-shrink-0 text-gray-600 dark:text-gray-400" />
         <div className="flex-1">
           <div className="flex items-center justify-between">
-            <h4 className="font-semibold text-sm text-orange-900 dark:text-orange-200">💡 Security Tip: {currentTip.title}</h4>
+            <h4 className="font-medium text-xs text-gray-800 dark:text-gray-200">Security Tip: {currentTip.title}</h4>
             <div className="flex items-center gap-2">
               <Button
                 type="button"
                 variant="ghost"
                 size="sm"
                 onClick={getNewTip}
-                className="h-6 px-2 text-xs hover:opacity-80 text-orange-600 dark:text-orange-400 hover:bg-orange-100 dark:hover:bg-orange-900/20"
+                className="h-5 px-1 text-xs hover:opacity-80 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800"
               >
                 New Tip
               </Button>
@@ -116,13 +116,13 @@ export function SecurityTips() {
                 variant="ghost"
                 size="sm"
                 onClick={dismissTip}
-                className="h-6 w-6 p-0 hover:opacity-80 text-orange-600 dark:text-orange-400 hover:bg-orange-100 dark:hover:bg-orange-900/20"
+                className="h-5 w-5 p-0 hover:opacity-80 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800"
               >
                 <X className="h-3 w-3" aria-hidden="true" />
               </Button>
             </div>
           </div>
-          <AlertDescription className="text-sm mt-1 text-orange-800 dark:text-orange-300">
+          <AlertDescription className="text-xs mt-0.5 text-gray-700 dark:text-gray-300 leading-tight">
             {currentTip.description}
           </AlertDescription>
         </div>

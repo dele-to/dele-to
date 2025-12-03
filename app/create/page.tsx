@@ -13,7 +13,8 @@ import { Switch } from "@/components/ui/switch"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Badge } from "@/components/ui/badge"
-import { Copy, Shield, ArrowLeft, Key, RefreshCw, AlertTriangle, Link2, QrCode, Plus, Trash2, Users, User, X, Tag } from "lucide-react"
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
+import { Copy, Shield, ArrowLeft, Key, RefreshCw, AlertTriangle, Link2, QrCode, Plus, Trash2, Users, User, X, Tag, Mail, Send, ChevronDown, Settings, Crown } from "lucide-react"
 import Link from "next/link"
 import { createSecureShare } from "../actions/share"
 import { SecureCrypto } from "../../lib/crypto"
@@ -21,10 +22,12 @@ import { SecurityTips } from "@/components/security-tips"
 import { InlineTip } from "@/components/inline-tip"
 import { PasswordInput } from "@/components/password-input"
 import { QrCodeModal } from "@/components/qr-code-modal"
+import { Header } from "@/components/header"
 
 interface Recipient {
   id: string
   name: string
+  email?: string
   expirationTime: string
   maxViews: number
   requirePassword: boolean
@@ -34,11 +37,15 @@ interface Recipient {
 interface GeneratedLink {
   recipientId: string
   recipientName: string
+  recipientEmail?: string
   shareId: string
   shareLink: string
   expirationTime: string
   maxViews: number
   requirePassword: boolean
+  emailToken?: string
+  emailSent?: boolean
+  emailError?: string
 }
 
 export default function CreatePage() {
@@ -51,6 +58,7 @@ export default function CreatePage() {
   
   // Single recipient settings (when multiRecipient is false)
   const [singleRecipientSettings, setSingleRecipientSettings] = useState({
+    email: "",
     expirationTime: "1h",
     maxViews: 1,
     requirePassword: false,
@@ -70,6 +78,7 @@ export default function CreatePage() {
   const [isClient, setIsClient] = useState(false)
   const [error, setError] = useState("")
   const [tags, setTags] = useState(["NEW"])
+  const [isAdvancedSettingsOpen, setIsAdvancedSettingsOpen] = useState(false)
 
   useEffect(() => {
     setIsClient(true)
@@ -82,6 +91,7 @@ export default function CreatePage() {
     const newRecipient: Recipient = {
       id: crypto.randomUUID(),
       name: newRecipientName.trim(),
+      email: "",
       expirationTime: "1h",
       maxViews: 1,
       requirePassword: false,
@@ -129,7 +139,7 @@ export default function CreatePage() {
     // Validate passwords for recipients that require them
     const recipientsToProcess = formData.multiRecipient ? recipients : [{
       id: 'single',
-      name: 'Single Recipient',
+      name: 'there',
       ...singleRecipientSettings
     }]
 
@@ -168,6 +178,7 @@ export default function CreatePage() {
 
         if (result.success && result.id) {
           const shareId = result.id
+          const emailToken = result.emailToken
           
           // Immediate verification
           setTimeout(async () => {
@@ -185,11 +196,13 @@ export default function CreatePage() {
           links.push({
             recipientId: recipient.id,
             recipientName: recipient.name,
+            recipientEmail: recipient.email,
             shareId,
             shareLink: shareUrl,
             expirationTime: recipient.expirationTime,
             maxViews: recipient.maxViews,
             requirePassword: recipient.requirePassword,
+            emailToken,
           })
         } else {
           setError(result.error || `Failed to create secure share for ${recipient.name}`)
@@ -212,6 +225,59 @@ export default function CreatePage() {
     setTimeout(() => setCopiedLinkId(null), 2000)
   }
 
+  const sendEmail = async (linkIndex: number) => {
+    const link = generatedLinks[linkIndex]
+    if (!link.recipientEmail) return
+
+    try {
+      // Get expiration date from the share
+      const expiresAt = new Date()
+      switch (link.expirationTime) {
+        case "15m":
+          expiresAt.setMinutes(expiresAt.getMinutes() + 15)
+          break
+        case "1h":
+          expiresAt.setHours(expiresAt.getHours() + 1)
+          break
+        case "24h":
+          expiresAt.setHours(expiresAt.getHours() + 24)
+          break
+        case "7d":
+          expiresAt.setDate(expiresAt.getDate() + 7)
+          break
+        default:
+          expiresAt.setHours(expiresAt.getHours() + 1)
+      }
+
+      // Call server action directly (no API route needed)
+      const result = await sendSecureShareEmail({
+        to: link.recipientEmail,
+        recipientName: link.recipientName,
+        shareLink: link.shareLink,
+        title: formData.title,
+        expiresAt: expiresAt.toISOString(),
+        maxViews: link.maxViews,
+        emailToken: link.emailToken || '',
+      })
+
+      // Update the link status
+      const updatedLinks = [...generatedLinks]
+      if (result.success) {
+        updatedLinks[linkIndex] = { ...link, emailSent: true }
+      } else {
+        updatedLinks[linkIndex] = { ...link, emailError: result.error }
+      }
+      setGeneratedLinks(updatedLinks)
+    } catch (error) {
+      const updatedLinks = [...generatedLinks]
+      updatedLinks[linkIndex] = { 
+        ...link, 
+        emailError: error instanceof Error ? error.message : 'Failed to send email' 
+      }
+      setGeneratedLinks(updatedLinks)
+    }
+  }
+
   const openQrModal = (link: string, title: string) => {
     setQrModalLink(link)
     setQrModalTitle(title)
@@ -230,6 +296,7 @@ export default function CreatePage() {
   if (generatedLinks.length > 0) {
     return (
       <div className="min-h-screen p-4">
+        <Header />
         <div className="container mx-auto max-w-4xl py-16">
           <Card>
             <CardHeader className="text-center">
@@ -264,7 +331,40 @@ export default function CreatePage() {
                           {link.requirePassword && ' • Password protected'}
                         </CardDescription>
                       </CardHeader>
-                      <CardContent className="pt-0">
+                      <CardContent className="pt-0 space-y-2">
+                        {link.recipientEmail && (
+                          <div className="flex gap-2 items-center">
+                            <Mail className="w-4 h-4 text-gray-500" />
+                            <Input 
+                              value={link.recipientEmail} 
+                              readOnly 
+                              className="text-xs flex-1" 
+                            />
+                            <Button 
+                              onClick={() => sendEmail(generatedLinks.indexOf(link))} 
+                              variant={link.emailSent ? "default" : "outline"}
+                              size="sm"
+                              disabled={link.emailSent}
+                            >
+                              {link.emailSent ? (
+                                <>
+                                  <Send className="w-4 h-4 mr-1" />
+                                  Sent
+                                </>
+                              ) : (
+                                <>
+                                  <Send className="w-4 h-4 mr-1" />
+                                  Send
+                                </>
+                              )}
+                            </Button>
+                          </div>
+                        )}
+                        {link.emailError && (
+                          <Alert variant="destructive" className="py-2">
+                            <AlertDescription className="text-xs">{link.emailError}</AlertDescription>
+                          </Alert>
+                        )}
                         <div className="flex gap-2">
                           <Input 
                             value={link.shareLink} 
@@ -294,25 +394,62 @@ export default function CreatePage() {
                   ))}
                 </div>
               ) : (
-                <div>
-                  <Label htmlFor="share-link">Secure Share Link</Label>
-                  <div className="flex gap-2 mt-2">
-                    <Input 
-                      id="share-link" 
-                      value={generatedLinks[0].shareLink} 
-                      readOnly 
-                      className="font-mono text-sm" 
-                    />
-                    <Button onClick={() => copyToClipboard(generatedLinks[0].shareLink, generatedLinks[0].recipientId)} variant="outline">
-                      <Copy className="w-4 h-4" />
-                    </Button>
-                    <Button onClick={() => openQrModal(generatedLinks[0].shareLink, formData.title)} variant="outline">
-                      <QrCode className="w-4 h-4" />
-                    </Button>
-                  </div>
-                  {copiedLinkId === generatedLinks[0].recipientId && (
-                    <p className="text-sm text-green-600 mt-1">Copied to clipboard!</p>
+                <div className="space-y-3">
+                  {generatedLinks[0].recipientEmail && (
+                    <div>
+                      <Label htmlFor="recipient-email">Recipient Email</Label>
+                      <div className="flex gap-2 mt-2">
+                        <Input 
+                          id="recipient-email" 
+                          value={generatedLinks[0].recipientEmail} 
+                          readOnly 
+                          className="text-sm" 
+                        />
+                        <Button 
+                          onClick={() => sendEmail(0)} 
+                          variant={generatedLinks[0].emailSent ? "default" : "outline"}
+                          disabled={generatedLinks[0].emailSent}
+                        >
+                          {generatedLinks[0].emailSent ? (
+                            <>
+                              <Send className="w-4 h-4 mr-2" />
+                              Sent
+                            </>
+                          ) : (
+                            <>
+                              <Send className="w-4 h-4 mr-2" />
+                              Send Email
+                            </>
+                          )}
+                        </Button>
+                      </div>
+                      {generatedLinks[0].emailError && (
+                        <Alert variant="destructive" className="mt-2">
+                          <AlertDescription>{generatedLinks[0].emailError}</AlertDescription>
+                        </Alert>
+                      )}
+                    </div>
                   )}
+                  <div>
+                    <Label htmlFor="share-link">Secure Share Link</Label>
+                    <div className="flex gap-2 mt-2">
+                      <Input 
+                        id="share-link" 
+                        value={generatedLinks[0].shareLink} 
+                        readOnly 
+                        className="font-mono text-sm" 
+                      />
+                      <Button onClick={() => copyToClipboard(generatedLinks[0].shareLink, generatedLinks[0].recipientId)} variant="outline">
+                        <Copy className="w-4 h-4" />
+                      </Button>
+                      <Button onClick={() => openQrModal(generatedLinks[0].shareLink, formData.title)} variant="outline">
+                        <QrCode className="w-4 h-4" />
+                      </Button>
+                    </div>
+                    {copiedLinkId === generatedLinks[0].recipientId && (
+                      <p className="text-sm text-green-600 mt-1">Copied to clipboard!</p>
+                    )}
+                  </div>
                 </div>
               )}
 
@@ -332,8 +469,10 @@ export default function CreatePage() {
                 </AlertDescription>
               </Alert>
 
-              <div className="flex gap-4">
+              <div className="flex gap-3 mt-6">
                 <Button
+                  type="button"
+                  variant="default"
                   onClick={() => {
                     setGeneratedLinks([])
                     setFormData({
@@ -343,6 +482,7 @@ export default function CreatePage() {
                       multiRecipient: false,
                     })
                     setSingleRecipientSettings({
+                      email: "",
                       expirationTime: "1h",
                       maxViews: 1,
                       requirePassword: false,
@@ -350,12 +490,15 @@ export default function CreatePage() {
                     })
                     setRecipients([])
                   }}
-                  className="flex-1"
+                  className="flex-1 bg-red-600 hover:bg-red-700 text-white"
                 >
                   Create Another
                 </Button>
                 <Link href="/" className="flex-1">
-                  <Button variant="outline" className="w-full bg-transparent">
+                  <Button
+                    variant="outline"
+                    className="w-full border-gray-600 text-gray-300 hover:bg-gray-800"
+                  >
                     <ArrowLeft className="w-4 h-4 mr-2" />
                     Home
                   </Button>
@@ -387,10 +530,11 @@ export default function CreatePage() {
 
   return (
     <div className="min-h-screen p-4">
+      <Header />
       <div className="container mx-auto max-w-2xl py-8">
         <div className="mb-6">
           <Link href="/">
-            <Button variant="ghost">
+            <Button variant="outline" className="border-gray-600 text-gray-300 hover:bg-gray-800">
               <ArrowLeft className="w-4 h-4 mr-2" />
               Back to Home
             </Button>
@@ -425,8 +569,8 @@ export default function CreatePage() {
                 />
               </div>
 
-              <div>
-                <Label htmlFor="content">Secret Content *</Label>
+              <div className="space-y-3 p-4 border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 rounded-lg">
+                <Label htmlFor="content" className="text-base font-medium">Secret Content *</Label>
                 <Textarea
                   id="content"
                   placeholder="Enter your password, API key, or sensitive information here..."
@@ -435,13 +579,73 @@ export default function CreatePage() {
                   required
                   rows={4}
                 />
-                <p className="text-sm text-gray-600 mt-1">
+                <p className="text-xs text-gray-500 mt-1">
                   This content will be encrypted with AES-256 in your browser before transmission.
                 </p>
-                <InlineTip className="mt-3">
-                  <strong>Pro tip:</strong> For login credentials, consider sharing the username, password, and server details in separate links for enhanced security isolation.
+                <InlineTip className="mt-2">
+                  <span className="text-xs text-gray-600 dark:text-gray-400">
+                    <strong>Pro tip:</strong> For login credentials, consider sharing the username, password, and server details in separate links for enhanced security isolation.
+                  </span>
                 </InlineTip>
               </div>
+
+              {/* Expiration and Views - Always Visible */}
+              {!formData.multiRecipient && (
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="expiration">Expiration Time</Label>
+                    <Select
+                      value={singleRecipientSettings.expirationTime}
+                      onValueChange={(value) => setSingleRecipientSettings({ ...singleRecipientSettings, expirationTime: value })}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="15m">15 minutes</SelectItem>
+                        <SelectItem value="1h">1 hour</SelectItem>
+                        <SelectItem value="24h">24 hours</SelectItem>
+                        <SelectItem value="7d">7 days</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div>
+                    <Label htmlFor="maxViews">Max Views</Label>
+                    <Select
+                      value={singleRecipientSettings.maxViews.toString()}
+                      onValueChange={(value) => setSingleRecipientSettings({ ...singleRecipientSettings, maxViews: parseInt(value) })}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="1">1 view (burn after reading)</SelectItem>
+                        <SelectItem value="3">3 views</SelectItem>
+                        <SelectItem value="5">5 views</SelectItem>
+                        <SelectItem value="10">10 views</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+              )}
+
+              {/* Advanced Settings */}
+              <Collapsible className="space-y-4" open={isAdvancedSettingsOpen} onOpenChange={setIsAdvancedSettingsOpen}>
+                <CollapsibleTrigger asChild>
+                  <Button variant="outline" className="w-full flex items-center gap-2 justify-between p-4 h-auto">
+                    <div className="flex items-center gap-2">
+                      <Settings className="w-4 h-4" />
+                      <div className="text-left">
+                        <span>Advanced Settings</span>
+                        <p className="text-xs text-gray-500 mt-1 hidden md:block">Multi-recipient, email delivery, notifications & more</p>
+                        <p className="text-xs text-gray-500 mt-1 md:hidden">Multi-recipient and email delivery</p>
+                      </div>
+                    </div>
+                    <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${isAdvancedSettingsOpen ? 'rotate-180' : ''}`} />
+                  </Button>
+                </CollapsibleTrigger>
+                <CollapsibleContent className="space-y-6 pt-4">
 
               {/* Multi-Recipient Toggle */}
               <div className="space-y-4">
@@ -508,6 +712,21 @@ export default function CreatePage() {
                               >
                                 <Trash2 className="w-4 h-4" />
                               </Button>
+                            </div>
+                            
+                            <div className="mb-3">
+                              <Label className="text-sm flex items-center gap-1">
+                                <Mail className="w-3 h-3" />
+                                Email (Optional)
+                              </Label>
+                              <Input
+                                type="email"
+                                placeholder="recipient@example.com"
+                                value={recipient.email || ""}
+                                onChange={(e) => updateRecipient(recipient.id, { email: e.target.value })}
+                                className="h-8 mt-1"
+                              />
+                              <p className="text-xs text-gray-500 mt-1">Send the link directly via email</p>
                             </div>
                             
                             <div className="grid grid-cols-2 gap-3 mb-3">
@@ -614,47 +833,6 @@ export default function CreatePage() {
                     </p>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <Label htmlFor="expiration">Expiration Time</Label>
-                      <Select
-                        value={singleRecipientSettings.expirationTime}
-                        onValueChange={(value) => setSingleRecipientSettings({ ...singleRecipientSettings, expirationTime: value })}
-                      >
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="15m">15 minutes</SelectItem>
-                          <SelectItem value="1h">1 hour</SelectItem>
-                          <SelectItem value="24h">24 hours</SelectItem>
-                          <SelectItem value="7d">7 days</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-
-                    <div>
-                      <Label htmlFor="maxViews">Max Views</Label>
-                      <Select
-                        value={singleRecipientSettings.maxViews.toString()}
-                        onValueChange={(value) => setSingleRecipientSettings({ ...singleRecipientSettings, maxViews: parseInt(value) })}
-                      >
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="1">1 view (burn after reading)</SelectItem>
-                          <SelectItem value="3">3 views</SelectItem>
-                          <SelectItem value="5">5 views</SelectItem>
-                          <SelectItem value="10">10 views</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-
-                  <InlineTip className="mt-4">
-                    <strong>Security strategy:</strong> Use shorter expiration times (15 minutes) for passwords and longer periods for less sensitive information like usernames or server names.
-                  </InlineTip>
 
                   <div className="space-y-4">
                     <div className="flex items-center justify-between">
@@ -726,15 +904,10 @@ export default function CreatePage() {
                 </div>
               )}
 
-              <Alert>
-                <Key className="w-4 h-4" />
-                <AlertDescription>
-                  <strong>Zero-Knowledge Encryption:</strong> Your data is encrypted in your browser using AES-256. The
-                  encryption key never leaves your device and is embedded in the share URL.
-                </AlertDescription>
-              </Alert>
+                </CollapsibleContent>
+              </Collapsible>
 
-              <Button type="submit" className="w-full" disabled={isLoading}>
+              <Button type="submit" className="w-full bg-red-600 hover:bg-red-700 text-white" disabled={isLoading}>
                 {isLoading ? "Creating Secure Links..." : formData.multiRecipient ? "Create Secure Links" : "Create Secure Link"}
               </Button>
             </form>
