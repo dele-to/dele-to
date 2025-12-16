@@ -1,17 +1,17 @@
 diff --git a/dist/client/components/router-reducer/fetch-server-response.js b/dist/client/components/router-reducer/fetch-server-response.js
-index 2d9c0421488770c601c1f119255fb88db9ebbe14..a2e59a8ba8ea4a3f9fe5507d2903bacbf2d1c2f1 100644
+index 62df867fc4bafc9b33ab3314e99fda2ea0817e61..7d56614b96a62ef2c20ace8db33cb46330a63da8 100644
 --- a/dist/client/components/router-reducer/fetch-server-response.js
 +++ b/dist/client/components/router-reducer/fetch-server-response.js
-@@ -32,7 +32,7 @@ async function fetchServerResponse(url, flightRouterState, nextUrl, currentBuild
+@@ -33,7 +33,7 @@ async function fetchServerResponse(url, flightRouterState, nextUrl, currentBuild
          // Enable flight response
          [_approuterheaders.RSC_HEADER]: "1",
          // Provide the current router state
--        [_approuterheaders.NEXT_ROUTER_STATE_TREE]: encodeURIComponent(JSON.stringify(flightRouterState))
-+        // [_approuterheaders.NEXT_ROUTER_STATE_TREE]: encodeURIComponent(JSON.stringify(flightRouterState))
+-        [_approuterheaders.NEXT_ROUTER_STATE_TREE]: (0, _flightdatahelpers.prepareFlightRouterStateForRequest)(flightRouterState)
++        // [_approuterheaders.NEXT_ROUTER_STATE_TREE]: (0, _flightdatahelpers.prepareFlightRouterStateForRequest)(flightRouterState)
      };
      /**
     * Three cases:
-@@ -50,7 +50,7 @@ async function fetchServerResponse(url, flightRouterState, nextUrl, currentBuild
+@@ -51,7 +51,7 @@ async function fetchServerResponse(url, flightRouterState, nextUrl, currentBuild
      }
      const uniqueCacheQuery = (0, _hash.hexHash)([
          headers[_approuterheaders.NEXT_ROUTER_PREFETCH_HEADER] || "0",
@@ -21,15 +21,15 @@ index 2d9c0421488770c601c1f119255fb88db9ebbe14..a2e59a8ba8ea4a3f9fe5507d2903bacb
      ].join(","));
      try {
 diff --git a/dist/client/components/router-reducer/reducers/server-action-reducer.js b/dist/client/components/router-reducer/reducers/server-action-reducer.js
-index cfb978bbdef2799fabc2c0d3fba1ec92af4802b2..a5e7fc269ccc00319c9fa81a681d43b8368eb8f4 100644
+index 4ff6b282f25bbfdc09f2b467c1dc10fcde6ab841..ae4a7b74b5aa4b6bd598e736ff6221ba00bb118d 100644
 --- a/dist/client/components/router-reducer/reducers/server-action-reducer.js
 +++ b/dist/client/components/router-reducer/reducers/server-action-reducer.js
-@@ -34,7 +34,7 @@ async function fetchServerAction(state, nextUrl, param) {
+@@ -35,7 +35,7 @@ async function fetchServerAction(state, nextUrl, param) {
          headers: {
              Accept: _approuterheaders.RSC_CONTENT_TYPE_HEADER,
              [_approuterheaders.ACTION]: actionId,
--            [_approuterheaders.NEXT_ROUTER_STATE_TREE]: encodeURIComponent(JSON.stringify(state.tree)),
-+            // [_approuterheaders.NEXT_ROUTER_STATE_TREE]: encodeURIComponent(JSON.stringify(state.tree)),
+-            [_approuterheaders.NEXT_ROUTER_STATE_TREE]: (0, _flightdatahelpers.prepareFlightRouterStateForRequest)(state.tree),
++            // [_approuterheaders.NEXT_ROUTER_STATE_TREE]: (0, _flightdatahelpers.prepareFlightRouterStateForRequest)(state.tree),
              ...process.env.NEXT_DEPLOYMENT_ID ? {
                  "x-deployment-id": process.env.NEXT_DEPLOYMENT_ID
              } : {},

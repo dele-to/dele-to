@@ -93,7 +93,7 @@
       "d3-color": ">=3.1.0"
     },
     "patchedDependencies": {
-      "next@14.2.30": "patches/next@14.2.30.patch"
+      "next@14.2.35": "patches/next@14.2.35.patch"
     }
   }
 }
