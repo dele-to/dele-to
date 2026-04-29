@@ -171,17 +171,6 @@ export default function CreatePage() {
 
         if (result.success && result.id) {
           const shareId = result.id
-          
-          // Immediate verification
-          setTimeout(async () => {
-            try {
-              const { testShareExists } = await import("../actions/share")
-              await testShareExists(shareId)
-            } catch (error) {
-              console.error("Share verification failed:", error)
-            }
-          }, 1000)
-
           // Include encryption key in URL fragment (same key for all)
           const shareUrl = `${window.location.origin}/view/${shareId}#${keyString}`
           
