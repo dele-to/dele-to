@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Copy, Eye, Shield, AlertTriangle, Clock, Key } from "lucide-react"
 import Link from "next/link"
-import { getSecureShare, getShareMetadata, testShareExists } from "../../actions/share"
+import { getSecureShare, getShareMetadata } from "../../actions/share"
 import { SecureCrypto } from "../../../lib/crypto"
 import { AccessTips } from "@/components/access-tips"
 import { PasswordInput } from "@/components/password-input"
@@ -68,9 +68,6 @@ export default function ViewPage({ params }: { params: { id: string } }) {
 
   const loadMetadata = async (id: string) => {
     try {
-      // First, let's test if the share exists at all
-      const existsResult = await testShareExists(id)
-
       const result = await getShareMetadata(id)
 
       if (result.success && result.data) {
