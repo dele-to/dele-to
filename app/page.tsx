@@ -7,7 +7,8 @@ export default function HomePage() {
   return (
     <div className="min-h-screen bg-background text-foreground overflow-x-hidden">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <div className="text-center max-w-4xl mx-auto">
+        <div className="relative text-center max-w-4xl mx-auto">
+          <div className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[400px] rounded-full bg-red-600/20 blur-[120px] dark:bg-red-600/25" />
           <Link href="https://github.com/ardd/dele-to-deployed" target="_blank" rel="noopener noreferrer">
             <span className="inline-flex items-center rounded-full bg-red-100 dark:bg-red-900/30 px-3 py-1 text-xs font-medium text-red-800 dark:text-red-300 ring-1 ring-inset ring-red-200 dark:ring-red-800 mb-6 hover:bg-red-200 dark:hover:bg-red-900/40 transition-colors">
               <Sparkles className="h-3 w-3 mr-1" /> Open source & zero-knowledge

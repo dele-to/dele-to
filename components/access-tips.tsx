@@ -5,7 +5,7 @@ import { Lightbulb, X } from "lucide-react"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 
-const accessTips = [
+export const accessTips = [
     {
         title: "Verify the Sender",
         description: "Confirm this link came from a trusted source through a separate communication channel before accessing."
@@ -16,7 +16,7 @@ const accessTips = [
     },
     {
         title: "Clear After Use",
-        description: "Clear your browser history and clipboard after accessing to remove traces of the decryption key."
+        description: "Clear your browser history and clipboard after accessing to remove traces of the root secret."
     },
     {
         title: "Act Quickly",
@@ -24,7 +24,7 @@ const accessTips = [
     },
     {
         title: "Don't Share the Link",
-        description: "This complete URL contains the decryption key. Never forward it to others or post it anywhere."
+        description: "This complete URL contains the root secret. Never forward it to others or post it anywhere."
     },
     {
         title: "Save Securely",

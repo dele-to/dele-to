@@ -2,24 +2,24 @@
 
 import type React from "react"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Switch } from "@/components/ui/switch"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Badge } from "@/components/ui/badge"
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
-import { Copy, Shield, ArrowLeft, Key, RefreshCw, AlertTriangle, Link2, QrCode, Plus, Trash2, Users, User, X, Tag, ChevronDown, Settings, Crown } from "lucide-react"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import { Copy, Check, Shield, ArrowLeft, Key, RefreshCw, AlertTriangle, Link2, QrCode, Plus, Trash2, Users, User, X, Tag, ChevronDown, Settings, Crown, Lock, Info } from "lucide-react"
 import Link from "next/link"
-import { createSecureShare } from "../actions/share"
+import { createSecureShare, deleteSecureShare } from "../actions/share"
 import { SecureCrypto } from "../../lib/crypto"
-import { SecurityTips } from "@/components/security-tips"
-import { InlineTip } from "@/components/inline-tip"
+import { securityTips } from "@/components/security-tips"
+import { SecretTemplates, type TemplateId } from "@/components/secret-templates"
 import { PasswordInput } from "@/components/password-input"
 import { QrCodeModal } from "@/components/qr-code-modal"
 import { Header } from "@/components/header"
@@ -41,6 +41,10 @@ interface GeneratedLink {
   expirationTime: string
   maxViews: number
   requirePassword: boolean
+  deleteCapability?: string
+  isDeleting?: boolean
+  deleted?: boolean
+  deleteError?: string
 }
 
 export default function CreatePage() {
@@ -73,10 +77,35 @@ export default function CreatePage() {
   const [error, setError] = useState("")
   const [tags, setTags] = useState(["NEW"])
   const [isAdvancedSettingsOpen, setIsAdvancedSettingsOpen] = useState(false)
+  const [isTitleOpen, setIsTitleOpen] = useState(false)
+  const [templateId, setTemplateId] = useState<TemplateId>("plain")
+  const [securityTip, setSecurityTip] = useState(securityTips[0])
+  const [isSecurityTipOpen, setIsSecurityTipOpen] = useState(false)
+  const [isMac, setIsMac] = useState(false)
+  const errorRef = useRef<HTMLDivElement>(null)
+  const formRef = useRef<HTMLFormElement>(null)
 
   useEffect(() => {
+    setSecurityTip(securityTips[Math.floor(Math.random() * securityTips.length)])
+    setIsMac(/Mac|iPod|iPhone|iPad/.test(navigator.platform || navigator.userAgent))
     setIsClient(true)
   }, [])
+
+  useEffect(() => {
+    if (error) errorRef.current?.scrollIntoView({ behavior: "smooth", block: "center" })
+  }, [error])
+
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key.toLowerCase() === "k" && (event.metaKey || event.ctrlKey)) {
+        event.preventDefault()
+        if (!isLoading) formRef.current?.requestSubmit()
+      }
+    }
+
+    window.addEventListener("keydown", handleKeyDown)
+    return () => window.removeEventListener("keydown", handleKeyDown)
+  }, [isLoading])
 
   const addRecipient = () => {
     if (!newRecipientName.trim()) return
@@ -147,17 +176,13 @@ export default function CreatePage() {
     setError("")
 
     try {
-      // Generate encryption key client-side (same key for all recipients)
-      const encryptionKey = await SecureCrypto.generateKey()
-      const keyString = await SecureCrypto.exportKey(encryptionKey)
-
-      // Encrypt content client-side (once for all recipients)
-      const { encrypted, iv } = await SecureCrypto.encrypt(formData.content, encryptionKey)
-
       const links: GeneratedLink[] = []
 
       // Create separate shares for each recipient
       for (const recipient of recipientsToProcess) {
+        const rootSecret = SecureCrypto.generateRootSecret()
+        const { encryptionKey, readCapability } = await SecureCrypto.deriveShareSecrets(rootSecret)
+        const { encrypted, iv } = await SecureCrypto.encrypt(formData.content, encryptionKey)
         const result = await createSecureShare({
           title: formData.title,
           encryptedContent: encrypted,
@@ -167,12 +192,13 @@ export default function CreatePage() {
           requirePassword: recipient.requirePassword,
           password: recipient.password,
           linkType: formData.linkType,
+          readCapability,
         })
 
-        if (result.success && result.id) {
+        if (result.success && result.id && result.readCapability) {
           const shareId = result.id
-          // Include encryption key in URL fragment (same key for all)
-          const shareUrl = `${window.location.origin}/view/${shareId}#${keyString}`
+          // Include the root secret in the URL fragment
+          const shareUrl = `${window.location.origin}/view/${shareId}#${rootSecret}`
           
           links.push({
             recipientId: recipient.id,
@@ -182,6 +208,7 @@ export default function CreatePage() {
             expirationTime: recipient.expirationTime,
             maxViews: recipient.maxViews,
             requirePassword: recipient.requirePassword,
+            deleteCapability: result.deleteCapability,
           })
         } else {
           setError(result.error || `Failed to create secure share for ${recipient.name}`)
@@ -190,6 +217,16 @@ export default function CreatePage() {
       }
 
       setGeneratedLinks(links)
+
+      if (!formData.multiRecipient && links[0]) {
+        try {
+          await navigator.clipboard.writeText(links[0].shareLink)
+          setCopiedLinkId(links[0].recipientId)
+          setTimeout(() => setCopiedLinkId(null), 2000)
+        } catch {
+          setCopiedLinkId(null)
+        }
+      }
     } catch (error) {
       console.error("Failed to create secure share:", error)
       setError("Failed to create secure share. Please try again.")
@@ -202,6 +239,90 @@ export default function CreatePage() {
     await navigator.clipboard.writeText(link)
     setCopiedLinkId(linkId)
     setTimeout(() => setCopiedLinkId(null), 2000)
+  }
+
+  const revokeShare = async (linkIndex: number) => {
+    const link = generatedLinks[linkIndex]
+    if (!link.deleteCapability || link.isDeleting || link.deleted) return
+
+    setGeneratedLinks((current) => current.map((item, index) =>
+      index === linkIndex ? { ...item, isDeleting: true, deleteError: undefined } : item
+    ))
+
+    try {
+      const result = await deleteSecureShare(link.shareId, link.deleteCapability)
+      setGeneratedLinks((current) => current.map((item, index) =>
+        index === linkIndex
+          ? result.success
+            ? { ...item, isDeleting: false, deleted: true, deleteCapability: undefined }
+            : { ...item, isDeleting: false, deleteError: result.error || "Failed to delete share" }
+          : item
+      ))
+    } catch (error) {
+      setGeneratedLinks((current) => current.map((item, index) =>
+        index === linkIndex
+          ? { ...item, isDeleting: false, deleteError: error instanceof Error ? error.message : "Failed to delete share" }
+          : item
+      ))
+    }
+  }
+
+  const renderRevokeControl = (link: GeneratedLink, linkIndex: number) => {
+    if (link.deleted) {
+      return (
+        <Alert className="border-green-200 bg-green-50 text-green-800 dark:border-green-900 dark:bg-green-950/30 dark:text-green-300">
+          <Check className="h-4 w-4" />
+          <AlertDescription>This share has been permanently deleted.</AlertDescription>
+        </Alert>
+      )
+    }
+
+    if (!link.deleteCapability) return null
+
+    return (
+      <Collapsible className="rounded-md border border-border/70 bg-muted/20">
+        <CollapsibleTrigger asChild>
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            className="w-full justify-between text-muted-foreground hover:bg-destructive/5 hover:text-destructive [&[data-state=open]>svg]:rotate-180"
+          >
+            <span className="flex items-center gap-2">
+              <Trash2 className="h-4 w-4" />
+              Need to revoke this link?
+            </span>
+            <ChevronDown className="h-4 w-4 transition-transform" />
+          </Button>
+        </CollapsibleTrigger>
+        <CollapsibleContent>
+          <div className="space-y-3 border-t px-3 py-3">
+            <p className="text-xs text-muted-foreground">
+              Permanently delete the encrypted share now. Anyone with the link will lose access, and this cannot be undone.
+            </p>
+            <Button
+              type="button"
+              variant="destructive"
+              size="sm"
+              disabled={link.isDeleting}
+              onClick={() => revokeShare(linkIndex)}
+            >
+              {link.isDeleting ? (
+                <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
+              ) : (
+                <Trash2 className="mr-2 h-4 w-4" />
+              )}
+              {link.isDeleting ? "Deleting..." : "Delete share permanently"}
+            </Button>
+            {link.deleteError && (
+              <Alert variant="destructive" className="py-2">
+                <AlertDescription className="text-xs">{link.deleteError}</AlertDescription>
+              </Alert>
+            )}
+          </div>
+        </CollapsibleContent>
+      </Collapsible>
+    )
   }
 
   const openQrModal = (link: string, title: string) => {
@@ -246,7 +367,7 @@ export default function CreatePage() {
                     Recipient Links
                   </h3>
                   {generatedLinks.map((link) => (
-                    <Card key={link.recipientId} className="border-l-4 border-l-blue-500">
+                    <Card key={link.recipientId} className={link.deleted ? "border-l-4 border-l-green-500 opacity-80" : "border-l-4 border-l-blue-500"}>
                       <CardHeader className="pb-3">
                         <CardTitle className="text-base flex items-center gap-2">
                           <User className="w-4 h-4" />
@@ -260,7 +381,7 @@ export default function CreatePage() {
                       <CardContent className="pt-0 space-y-2">
                         <div className="flex gap-2">
                           <Input 
-                            value={link.shareLink} 
+                            value={link.deleted ? "This share has been deleted" : link.shareLink}
                             readOnly 
                             className="font-mono text-xs" 
                           />
@@ -268,20 +389,23 @@ export default function CreatePage() {
                             onClick={() => copyToClipboard(link.shareLink, link.recipientId)} 
                             variant="outline"
                             size="sm"
+                            disabled={link.deleted}
                           >
-                            <Copy className="w-4 h-4" />
+                            {copiedLinkId === link.recipientId ? (
+                              <Check className="w-4 h-4 text-green-600" />
+                            ) : (
+                              <Copy className="w-4 h-4" />
+                            )}
                           </Button>
                           <Button 
                             onClick={() => openQrModal(link.shareLink, `${formData.title} - ${link.recipientName}`)} 
                             variant="outline"
                             size="sm"
+                            disabled={link.deleted}
                           >
                             <QrCode className="w-4 h-4" />
                           </Button>
                         </div>
-                        {copiedLinkId === link.recipientId && (
-                          <p className="text-sm text-green-600 mt-1">Copied to clipboard!</p>
-                        )}
                       </CardContent>
                     </Card>
                   ))}
@@ -289,43 +413,70 @@ export default function CreatePage() {
               ) : (
                 <div className="space-y-3">
                   <div>
-                    <Label htmlFor="share-link">Secure Share Link</Label>
+                    <div className="flex items-center gap-2">
+                      <Label htmlFor="share-link">Secure Share Link</Label>
+                      {copiedLinkId === generatedLinks[0].recipientId && (
+                        <span className="flex items-center gap-1 text-xs text-green-600 dark:text-green-500">
+                          <Check className="w-3 h-3" />
+                          Copied to clipboard automatically
+                        </span>
+                      )}
+                    </div>
                     <div className="flex gap-2 mt-2">
                       <Input 
                         id="share-link" 
-                        value={generatedLinks[0].shareLink} 
+                        value={generatedLinks[0].deleted ? "This share has been deleted" : generatedLinks[0].shareLink}
                         readOnly 
                         className="font-mono text-sm" 
                       />
-                      <Button onClick={() => copyToClipboard(generatedLinks[0].shareLink, generatedLinks[0].recipientId)} variant="outline">
-                        <Copy className="w-4 h-4" />
+                      <Button
+                        onClick={() => copyToClipboard(generatedLinks[0].shareLink, generatedLinks[0].recipientId)}
+                        variant="outline"
+                        disabled={generatedLinks[0].deleted}
+                      >
+                        {copiedLinkId === generatedLinks[0].recipientId ? (
+                          <Check className="w-4 h-4 text-green-600" />
+                        ) : (
+                          <Copy className="w-4 h-4" />
+                        )}
                       </Button>
-                      <Button onClick={() => openQrModal(generatedLinks[0].shareLink, formData.title)} variant="outline">
+                      <Button
+                        onClick={() => openQrModal(generatedLinks[0].shareLink, formData.title)}
+                        variant="outline"
+                        disabled={generatedLinks[0].deleted}
+                      >
                         <QrCode className="w-4 h-4" />
                       </Button>
                     </div>
-                    {copiedLinkId === generatedLinks[0].recipientId && (
-                      <p className="text-sm text-green-600 mt-1">Copied to clipboard!</p>
-                    )}
                   </div>
                 </div>
               )}
 
               <Alert>
                 <Key className="w-4 h-4" />
-                <AlertDescription>
-                  <strong>Security Notice:</strong> The decryption key is included in the URL fragment (#) and never
-                  sent to our servers. Only share each complete link with its intended recipient.
+                <AlertDescription className="space-y-1">
+                  <p>
+                    <strong>Security notice:</strong> The root secret is included in the URL fragment (#) and never
+                    sent to our servers. Only share each complete link with its intended recipient.
+                  </p>
+                  <p>
+                    Each link expires based on its own settings and can only be decrypted by someone with the complete link.
+                  </p>
                 </AlertDescription>
               </Alert>
 
-              <Alert>
-                <Shield className="w-4 h-4" />
-                <AlertDescription>
-                  <strong>Important:</strong> Each link will expire based on its individual settings. Your data is encrypted with
-                  AES-256 and can only be decrypted by someone with the complete link.
-                </AlertDescription>
-              </Alert>
+              <div className="space-y-2">
+                {formData.multiRecipient ? (
+                  generatedLinks.map((link, linkIndex) => (
+                    <div key={link.recipientId} className="space-y-1">
+                      <p className="px-1 text-xs text-muted-foreground">{link.recipientName}</p>
+                      {renderRevokeControl(link, linkIndex)}
+                    </div>
+                  ))
+                ) : (
+                  renderRevokeControl(generatedLinks[0], 0)
+                )}
+              </div>
 
               <div className="flex gap-3 mt-6">
                 <Button
@@ -333,6 +484,7 @@ export default function CreatePage() {
                   variant="default"
                   onClick={() => {
                     setGeneratedLinks([])
+                    setTemplateId("plain")
                     setFormData({
                       title: "",
                       content: "",
@@ -388,63 +540,90 @@ export default function CreatePage() {
   return (
     <div className="min-h-screen p-4">
       <Header />
-      <div className="container mx-auto max-w-2xl py-8">
-        <div className="mb-6">
-          <Link href="/">
-            <Button variant="outline" className="border-gray-600 text-gray-300 hover:bg-gray-800">
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Back to Home
-            </Button>
-          </Link>
-        </div>
-
-        <SecurityTips />
-        
+      <Link href="/" className="fixed top-4 left-4 z-50">
+        <Button variant="ghost" size="sm" className="gap-1.5 text-muted-foreground hover:text-foreground">
+          <ArrowLeft className="w-4 h-4" />
+          Back to Home
+        </Button>
+      </Link>
+      <div className="container mx-auto max-w-2xl pt-20 pb-8">
         <Card>
           <CardHeader>
-            <CardTitle>Create Secure Share</CardTitle>
-            <CardDescription>
-              Encrypt and share sensitive information with client-side AES-256 encryption
-            </CardDescription>
+            <div className="flex items-center gap-4">
+              <div className="shrink-0 flex items-center justify-center w-12 h-12 rounded-xl bg-red-100 dark:bg-red-900/30 border border-red-200 dark:border-red-800">
+                <Lock className="w-6 h-6 text-red-600 dark:text-red-500" />
+              </div>
+              <div>
+                <CardTitle className="text-2xl">Create Secure Share</CardTitle>
+                <CardDescription className="flex items-center gap-1.5">
+                  Share sensitive information securely.
+                  <Popover open={isSecurityTipOpen} onOpenChange={setIsSecurityTipOpen}>
+                    <PopoverTrigger asChild>
+                      <button
+                        type="button"
+                        className="text-muted-foreground hover:text-foreground shrink-0"
+                        aria-label="Security tip"
+                        onMouseEnter={() => setIsSecurityTipOpen(true)}
+                        onMouseLeave={() => setIsSecurityTipOpen(false)}
+                      >
+                        <Info className="w-3.5 h-3.5" />
+                      </button>
+                    </PopoverTrigger>
+                    <PopoverContent
+                      className="max-w-xs w-auto text-sm"
+                      onMouseEnter={() => setIsSecurityTipOpen(true)}
+                      onMouseLeave={() => setIsSecurityTipOpen(false)}
+                    >
+                      <p className="font-medium mb-1">Security Tip: {securityTip.title}</p>
+                      <p className="text-muted-foreground">{securityTip.description}</p>
+                    </PopoverContent>
+                  </Popover>
+                </CardDescription>
+              </div>
+            </div>
           </CardHeader>
           <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-6">
+            <form ref={formRef} onSubmit={handleSubmit} className="space-y-6">
               {error && (
-                <Alert variant="destructive">
+                <Alert variant="destructive" ref={errorRef}>
                   <AlertTriangle className="w-4 h-4" />
                   <AlertDescription>{error}</AlertDescription>
                 </Alert>
               )}
               
-              <div>
-                <Label htmlFor="title">Title (Optional)</Label>
-                <Input
-                  id="title"
-                  placeholder="e.g., Database Password, API Key"
-                  value={formData.title}
-                  onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                />
-              </div>
+              <Collapsible open={isTitleOpen} onOpenChange={setIsTitleOpen}>
+                <CollapsibleTrigger asChild>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="w-full flex items-center justify-between px-0 h-auto text-muted-foreground hover:text-foreground hover:bg-transparent"
+                  >
+                    <span className="flex items-center gap-1.5 text-sm truncate">
+                      <Tag className="w-3.5 h-3.5 shrink-0" />
+                      {formData.title || "Add a title (optional)"}
+                    </span>
+                    <ChevronDown className={`w-4 h-4 shrink-0 transition-transform duration-200 ${isTitleOpen ? "rotate-180" : ""}`} />
+                  </Button>
+                </CollapsibleTrigger>
+                <CollapsibleContent className="pt-2">
+                  <Label htmlFor="title">Title (Optional)</Label>
+                  <Input
+                    id="title"
+                    autoFocus
+                    placeholder="e.g., Database Password, API Key"
+                    value={formData.title}
+                    onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                  />
+                </CollapsibleContent>
+              </Collapsible>
 
-              <div className="space-y-3 p-4 border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 rounded-lg">
-                <Label htmlFor="content" className="text-base font-medium">Secret Content *</Label>
-                <Textarea
-                  id="content"
-                  placeholder="Enter your password, API key, or sensitive information here..."
-                  value={formData.content}
-                  onChange={(e) => setFormData({ ...formData, content: e.target.value })}
-                  required
-                  rows={4}
-                />
-                <p className="text-xs text-gray-500 mt-1">
-                  This content will be encrypted with AES-256 in your browser before transmission.
-                </p>
-                <InlineTip className="mt-2">
-                  <span className="text-xs text-gray-600 dark:text-gray-400">
-                    <strong>Pro tip:</strong> For login credentials, consider sharing the username, password, and server details in separate links for enhanced security isolation.
-                  </span>
-                </InlineTip>
-              </div>
+              <SecretTemplates
+                templateId={templateId}
+                onTemplateChange={setTemplateId}
+                content={formData.content}
+                onContentChange={(content) => setFormData((current) => ({ ...current, content }))}
+              />
 
               {/* Expiration and Views - Always Visible */}
               {!formData.multiRecipient && (
@@ -514,7 +693,7 @@ export default function CreatePage() {
                         NEW
                       </Badge>
                     </div>
-                    <p className="text-sm text-gray-600">Encrypt once, generate multiple links for different recipients (max 3)</p>
+                    <p className="text-sm text-gray-600">Encrypt separately and generate unique links for different recipients (max 3)</p>
                   </div>
                   <Switch
                     id="multiRecipient"
@@ -527,7 +706,7 @@ export default function CreatePage() {
                   <Alert>
                     <Users className="w-4 h-4" />
                     <AlertDescription>
-                      <strong>Multi-Recipient Mode:</strong> Your content will be encrypted once, but each recipient will get their own unique link with individual expiration and access settings.
+                      <strong>Multi-Recipient Mode:</strong> Your content will be encrypted separately for each recipient, with a unique link and individual expiration and access settings.
                     </AlertDescription>
                   </Alert>
                 )}
@@ -750,9 +929,32 @@ export default function CreatePage() {
                 </CollapsibleContent>
               </Collapsible>
 
-              <Button type="submit" className="w-full bg-red-600 hover:bg-red-700 text-white" disabled={isLoading}>
-                {isLoading ? "Creating Secure Links..." : formData.multiRecipient ? "Create Secure Links" : "Create Secure Link"}
+              <Button
+                type="submit"
+                size="lg"
+                className="w-full bg-gradient-to-r from-red-600 to-red-500 hover:from-red-700 hover:to-red-600 text-white gap-2 relative"
+                disabled={isLoading}
+              >
+                {isLoading ? (
+                  <>
+                    <RefreshCw className="w-4 h-4 animate-spin" />
+                    {formData.multiRecipient ? "Creating Secure Links..." : "Creating Secure Link..."}
+                  </>
+                ) : (
+                  <>
+                    <Lock className="w-4 h-4" />
+                    {formData.multiRecipient ? "Create Secure Links" : "Create Secure Link"}
+                    <kbd className="hidden sm:inline-flex items-center gap-0.5 absolute right-3 rounded border border-white/30 bg-white/10 px-1.5 py-0.5 text-[10px] font-medium">
+                      {isMac ? "⌘" : "Ctrl"}K
+                    </kbd>
+                  </>
+                )}
               </Button>
+
+              <p className="flex items-center justify-center gap-1.5 text-xs text-muted-foreground">
+                <Shield className="w-3.5 h-3.5" />
+                End-to-end encrypted. Only recipients can decrypt.
+              </p>
             </form>
           </CardContent>
         </Card>

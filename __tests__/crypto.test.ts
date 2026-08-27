@@ -10,6 +10,8 @@ const mockCrypto = {
     generateKey: jest.fn(),
     exportKey: jest.fn(),
     importKey: jest.fn(),
+    deriveKey: jest.fn(),
+    deriveBits: jest.fn(),
     encrypt: jest.fn(),
     decrypt: jest.fn(),
   },
@@ -83,6 +85,54 @@ describe('SecureCrypto', () => {
         ['encrypt', 'decrypt']
       )
       expect(result).toBe(mockKey)
+    })
+  })
+
+  describe('deriveShareSecrets', () => {
+    it('should derive separate encryption and read capability values from one root secret', async () => {
+      const rootSecret = 'A'.repeat(43)
+      const mockBaseKey = { type: 'secret', algorithm: { name: 'HKDF' } }
+      const mockEncryptionKey = { type: 'secret', algorithm: { name: 'AES-GCM' } }
+      const readCapabilityBytes = new Uint8Array(32).fill(7)
+
+      global.atob = jest.fn(() => '\0'.repeat(32))
+      global.btoa = jest.fn(() => 'BwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwc=')
+      mockCrypto.subtle.importKey.mockResolvedValue(mockBaseKey)
+      mockCrypto.subtle.deriveKey.mockResolvedValue(mockEncryptionKey)
+      mockCrypto.subtle.deriveBits.mockResolvedValue(readCapabilityBytes.buffer)
+
+      const result = await SecureCrypto.deriveShareSecrets(rootSecret)
+
+      expect(mockCrypto.subtle.importKey).toHaveBeenCalledWith(
+        'raw',
+        expect.any(ArrayBuffer),
+        'HKDF',
+        false,
+        ['deriveKey', 'deriveBits']
+      )
+      expect(mockCrypto.subtle.deriveKey).toHaveBeenCalledWith(
+        expect.objectContaining({ name: 'HKDF', hash: 'SHA-256' }),
+        mockBaseKey,
+        { name: 'AES-GCM', length: 256 },
+        false,
+        ['encrypt', 'decrypt']
+      )
+      expect(mockCrypto.subtle.deriveBits).toHaveBeenCalledWith(
+        expect.objectContaining({ name: 'HKDF', hash: 'SHA-256' }),
+        mockBaseKey,
+        256
+      )
+      expect(result).toEqual({
+        encryptionKey: mockEncryptionKey,
+        readCapability: 'BwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwc',
+      })
+    })
+
+    it('should reject invalid root secret lengths', async () => {
+      global.atob = jest.fn(() => 'short')
+
+      await expect(SecureCrypto.deriveShareSecrets('invalid')).rejects.toThrow('Invalid root secret')
+      expect(mockCrypto.subtle.importKey).not.toHaveBeenCalled()
     })
   })
 

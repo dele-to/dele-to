@@ -1,6 +1,6 @@
 "use server"
 
-import { randomUUID, randomBytes } from "crypto"
+import { createHash, randomUUID, randomBytes, timingSafeEqual } from "crypto"
 import {
   storeData,
   getData,
@@ -18,6 +18,23 @@ const logWarn = DEBUG_ENABLED ? console.warn : () => {}
 function hashPassword(password: string): string {
   const salt = process.env.SALT || "default-salt-change-in-production"
   return Buffer.from(password + salt).toString("base64")
+}
+
+function generateCapability(): string {
+  return randomBytes(32).toString("base64url")
+}
+
+function hashCapability(capability: string): string {
+  return createHash("sha256").update(capability).digest("base64url")
+}
+
+function verifyCapability(capability: string | undefined, expectedHash: string | undefined): boolean {
+  if (!expectedHash) return true
+  if (!capability || typeof capability !== "string") return false
+
+  const actual = new Uint8Array(createHash("sha256").update(capability).digest())
+  const expected = new Uint8Array(Buffer.from(expectedHash, "base64url"))
+  return actual.length === expected.length && timingSafeEqual(actual, expected)
 }
 
 function generateShareId(linkType: string = "standard"): string {
@@ -55,6 +72,7 @@ export async function createSecureShare(data: {
   requirePassword: boolean
   password?: string
   linkType?: string
+  readCapability?: string
 }) {
   log("🚀 Creating secure share with data:", {
     title: data.title,
@@ -78,6 +96,10 @@ export async function createSecureShare(data: {
       return { success: false, error: "Invalid max views count" }
     }
 
+    if (data.readCapability !== undefined && !/^[A-Za-z0-9_-]{43}$/.test(data.readCapability)) {
+      return { success: false, error: "Invalid read capability" }
+    }
+
     const id = generateShareId(data.linkType || "standard")
     const expiresAt = getExpirationTime(data.expirationTime)
     const now = new Date()
@@ -91,6 +113,9 @@ export async function createSecureShare(data: {
       return { success: false, error: "Invalid expiration time" }
     }
 
+    const readCapability = data.readCapability || generateCapability()
+    const deleteCapability = generateCapability()
+
     const share: ShareData = {
       id,
       title: data.title || "",
@@ -101,6 +126,8 @@ export async function createSecureShare(data: {
       currentViews: 0,
       requirePassword: data.requirePassword,
       passwordHash: data.requirePassword && data.password ? hashPassword(data.password) : undefined,
+      readCapabilityHash: hashCapability(readCapability),
+      deleteCapabilityHash: hashCapability(deleteCapability),
       createdAt: now.toISOString(),
     }
 
@@ -137,14 +164,14 @@ export async function createSecureShare(data: {
     }
 
     log(`🎉 Successfully created secure share with ID: ${id}`)
-    return { success: true, id }
+    return { success: true, id, readCapability, deleteCapability }
   } catch (error) {
     logError("❌ Error creating secure share:", error)
     return { success: false, error: "Failed to create secure share" }
   }
 }
 
-export async function getSecureShare(id: string, password?: string) {
+export async function getSecureShare(id: string, password?: string, readCapability?: string) {
   log(`🔍 Getting secure share with ID: ${id}`)
 
   try {
@@ -160,6 +187,10 @@ export async function getSecureShare(id: string, password?: string) {
 
     if (!share) {
       logError(`❌ Share not found for ID: ${id}`)
+      return { success: false, error: "Share not found or has expired" }
+    }
+
+    if (!verifyCapability(readCapability, share.readCapabilityHash)) {
       return { success: false, error: "Share not found or has expired" }
     }
 
@@ -223,7 +254,7 @@ export async function getSecureShare(id: string, password?: string) {
   }
 }
 
-export async function getShareMetadata(id: string) {
+export async function getShareMetadata(id: string, readCapability?: string) {
   log(`📋 Getting metadata for share ID: ${id}`)
 
   try {
@@ -239,6 +270,10 @@ export async function getShareMetadata(id: string) {
 
     if (!share) {
       logError(`❌ Share metadata not found for ID: ${id}`)
+      return { success: false, error: "Share not found or has expired" }
+    }
+
+    if (!verifyCapability(readCapability, share.readCapabilityHash)) {
       return { success: false, error: "Share not found or has expired" }
     }
 
@@ -259,5 +294,26 @@ export async function getShareMetadata(id: string) {
   } catch (error) {
     logError("❌ Error getting share metadata:", error)
     return { success: false, error: "Failed to retrieve share metadata" }
+  }
+}
+
+export async function deleteSecureShare(id: string, deleteCapability: string) {
+  try {
+    if (!id || typeof id !== "string" || !deleteCapability || typeof deleteCapability !== "string") {
+      return { success: false, error: "Share not found or has expired" }
+    }
+
+    const key = `share:${id}`
+    const share = await getData(key)
+
+    if (!share?.deleteCapabilityHash || !verifyCapability(deleteCapability, share.deleteCapabilityHash)) {
+      return { success: false, error: "Share not found or has expired" }
+    }
+
+    await deleteData(key)
+    return { success: true }
+  } catch (error) {
+    logError("❌ Error deleting secure share:", error)
+    return { success: false, error: "Failed to delete secure share" }
   }
 }

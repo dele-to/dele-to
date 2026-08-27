@@ -2,6 +2,67 @@
 
 // Client-side encryption utilities using Web Crypto API
 export class SecureCrypto {
+  private static encodeBase64Url(bytes: Uint8Array): string {
+    return btoa(String.fromCharCode(...bytes))
+      .replace(/\+/g, "-")
+      .replace(/\//g, "_")
+      .replace(/=+$/, "")
+  }
+
+  private static decodeBase64Url(value: string): Uint8Array {
+    const padding = "=".repeat((4 - (value.length % 4)) % 4)
+    const base64 = value.replace(/-/g, "+").replace(/_/g, "/") + padding
+    return new Uint8Array(
+      atob(base64)
+        .split("")
+        .map((char) => char.charCodeAt(0)),
+    )
+  }
+
+  static generateRootSecret(): string {
+    return this.encodeBase64Url(window.crypto.getRandomValues(new Uint8Array(32)))
+  }
+
+  static async deriveShareSecrets(rootSecret: string): Promise<{
+    encryptionKey: CryptoKey
+    readCapability: string
+  }> {
+    const rootBytes = this.decodeBase64Url(rootSecret)
+    if (rootBytes.length !== 32) throw new Error("Invalid root secret")
+
+    const encoder = new TextEncoder()
+    const rootKeyMaterial = new ArrayBuffer(rootBytes.byteLength)
+    new Uint8Array(rootKeyMaterial).set(rootBytes)
+    const baseKey = await window.crypto.subtle.importKey(
+      "raw",
+      rootKeyMaterial,
+      "HKDF",
+      false,
+      ["deriveKey", "deriveBits"],
+    )
+    const params = (info: string) => ({
+      name: "HKDF",
+      hash: "SHA-256",
+      salt: encoder.encode("deleto:share:v1"),
+      info: encoder.encode(info),
+    })
+    const [encryptionKey, readCapabilityBits] = await Promise.all([
+      window.crypto.subtle.deriveKey(
+        params("encryption"),
+        baseKey,
+        { name: "AES-GCM", length: 256 },
+        false,
+        ["encrypt", "decrypt"],
+      ),
+      window.crypto.subtle.deriveBits(params("read-capability"), baseKey, 256),
+    ])
+
+    return {
+      encryptionKey,
+      readCapability: this.encodeBase64Url(new Uint8Array(readCapabilityBits)),
+    }
+  }
+
   // Generate a random encryption key
   static async generateKey(): Promise<CryptoKey> {
     return await window.crypto.subtle.generateKey(

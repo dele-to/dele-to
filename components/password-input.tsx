@@ -12,6 +12,8 @@ interface PasswordInputProps {
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void
   required?: boolean
   className?: string
+  maxLength?: number
+  inputMode?: "text" | "numeric" | "tel" | "email" | "url"
 }
 
 export function PasswordInput({ 
@@ -20,7 +22,9 @@ export function PasswordInput({
   value, 
   onChange, 
   required = false,
-  className = ""
+  className = "",
+  maxLength,
+  inputMode,
 }: PasswordInputProps) {
   const [showPassword, setShowPassword] = useState(false)
 
@@ -38,6 +42,8 @@ export function PasswordInput({
         onChange={onChange}
         required={required}
         className={`pr-10 ${className}`}
+        maxLength={maxLength}
+        inputMode={inputMode}
       />
       <Button
         type="button"

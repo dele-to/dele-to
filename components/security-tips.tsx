@@ -5,7 +5,7 @@ import { Lightbulb, X } from "lucide-react"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 
-const securityTips = [
+export const securityTips = [
   {
     title: "Practice Data Compartmentalization",
     description: "Send usernames, passwords, and server locations in separate secure shares to limit exposure if one is compromised."
@@ -52,7 +52,7 @@ const securityTips = [
   },
   {
     title: "Clean Digital Traces",
-    description: "The complete share URL contains the decryption key. Clear it from browser history and clipboard after use."
+    description: "The complete share URL contains the root secret. Clear it from browser history and clipboard after use."
   },
   {
     title: "Separate Authentication Factors",

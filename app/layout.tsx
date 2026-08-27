@@ -11,10 +11,6 @@ export const metadata: Metadata = {
   title: 'DELETO | Secure Credential Sharing',
   description: 'Secure credential sharing with client-side AES-256 encryption',
   keywords: 'secure sharing, password sharing, credential sharing, AES encryption, temporary links, secret sharing, encrypted messages, secure communication, privacy, cybersecurity',
-  icons: {
-    icon: '/favicon.ico',
-  },
-
   openGraph: {
     title: 'DELETO | Secure Credential Sharing',
     description: 'Secure credential sharing with client-side AES-256 encryption',
