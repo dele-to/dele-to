@@ -8,10 +8,10 @@
 
 *From Latin dēlētō — "erase, destroy."*
 
-**Secure credential sharing with client-side AES-256 encryption, zero-knowledge architecture, and automatic self-destruction.
-Alternative to PasswordPusher, Yopass and Bitwarden Send**
+**Secure credential sharing with client-side AES-256-GCM encryption, capability-protected links, and automatic self-destruction.
+Alternative to PasswordPusher, Yopass, and Bitwarden Send.**
 
-DELE.TO is a modern, secure platform for sharing sensitive information like passwords, API keys, and credentials. Built with Next.js 14 and featuring client-side encryption, your data is encrypted in your browser before it ever reaches server.
+DELE.TO is a zero-knowledge platform for sharing passwords, API keys, credentials, and structured secrets. Each share is encrypted in the browser before it reaches the server. A root secret stays in the URL fragment and is used to derive separate encryption and read-capability values with HKDF-SHA-256.
 
 🔗 https://dele.to — Try it instantly in your browser. No signup required.
 
@@ -31,21 +31,24 @@ DELE.TO is a modern, secure platform for sharing sensitive information like pass
 
 ## ✨ Features
 
-- 🔐 **Client-side AES-256-GCM encryption** - Data encrypted in your browser
-- 🔑 **Zero-knowledge architecture** - Server never sees your encryption keys
-- ⏰ **Auto-expiration** - Set custom expiration times (15m to 7 days)
-- 👁️ **View limits** - Burn-after-reading with configurable view counts
-- 🔒 **Optional password protection** - Add extra security layer
-- 🌐 **URL fragment keys** - Encryption keys never sent to server
-- 💾 **Redis storage** - Encrypted data with automatic TTL cleanup
-- 📱 **Responsive design** - Works on all devices
+- **Client-side AES-256-GCM encryption** - Secret content never leaves the browser in plaintext
+- **HKDF-derived share secrets** - One root secret derives separate encryption and read-capability values
+- **Capability-protected access** - The server stores capability hashes instead of plaintext capabilities
+- **Share revocation** - Creators can permanently revoke a generated link
+- **Structured secret templates** - Login, credit card, API key, SSH key, Wi-Fi, bank, wallet, secure note, and plain text
+- **Per-recipient encryption** - Multi-recipient shares receive independently encrypted links
+- **Automatic expiration and view limits** - Includes burn-after-reading behavior
+- **Optional password protection** - Adds another access-control layer
+- **QR code sharing** - Open generated links on another device
+- **Redis or local storage** - Encrypted payloads use TTL cleanup with a development fallback
+- **Responsive dark-mode interface** - Works across desktop and mobile devices
 
 ## 📸 Screenshots
 
 <div style="display: flex; overflow-x: auto; white-space: nowrap; padding-bottom: 20px;">
-  <img src=".github/screen1.png" alt="Create a new share" width="400" style="margin-right: 10px; border-radius: 8px; border: 1px solid #ddd;">
-  <img src=".github/screen2.png" alt="View a share" width="400" style="margin-right: 10px; border-radius: 8px; border: 1px solid #ddd;">
-  <img src=".github/screen3.png" alt="Share created confirmation" width="400" style="border-radius: 8px; border: 1px solid #ddd;">
+  <img src=".github/screen1.png" alt="Create a structured login secret from a template" width="400" style="margin-right: 10px; border-radius: 8px; border: 1px solid #ddd;">
+  <img src=".github/screen2.png" alt="Generated secure link with security guidance and revocation" width="400" style="margin-right: 10px; border-radius: 8px; border: 1px solid #ddd;">
+  <img src=".github/screen3.png" alt="Decrypted structured login secret with masked sensitive fields" width="400" style="border-radius: 8px; border: 1px solid #ddd;">
 </div>
 
 
@@ -54,7 +57,7 @@ DELE.TO is a modern, secure platform for sharing sensitive information like pass
 ### Prerequisites
 
 - **Node.js 20+** - [Download here](https://nodejs.org/)
-- **pnpm** (recommended) - Install with `npm install -g pnpm`
+- **pnpm 9** - Enable the pinned package manager with `corepack enable`
 - **Git** - For cloning the repository
 
 **Optional for Production:**
@@ -105,7 +108,7 @@ SALT=your-super-secret-salt-change-me-in-production
 
 ```
 
-> **💡 Development Note:** The app automatically uses local file storage (`./secure-shares/` directory) when Redis is not configured, making it perfect for development and testing without any setup.
+> **💡 Development Note:** The app automatically uses local file storage (`./.secure-shares/` directory) when Redis is not configured, making it perfect for development and testing without any setup.
 
 #### 4. Start Development Server
 ```bash
@@ -116,9 +119,10 @@ The app will be available at **http://localhost:3000**
 
 #### 5. Test the Application
 1. Open http://localhost:3000 in your browser
-2. Click "Share Securely" to create a test share
-3. Enter some test data and create a share
-4. Copy the generated link and test viewing it
+2. Click "Create a secret"
+3. Choose a template or enter plain text, then create the share
+4. Open the generated link and verify client-side decryption
+5. Return to the creation result and test revoking the link
 
 ### Running with Docker
 
@@ -149,74 +153,47 @@ DELE.TO uses a zero-knowledge architecture where encryption happens entirely cli
 
 ```mermaid
 graph TB
-    subgraph "Client Browser"
-        A[User Input] --> B[Generate AES-256 Key]
-        B --> C[Generate Random IV]
-        C --> D[Encrypt Data Client-Side]
-        D --> E[Base64 Encode]
-        E --> F[Send to Server]
-        
-        subgraph "URL Fragment"
-            G[Encryption Key]
-            G -.->|Never sent to server| H[URL Hash #key]
-        end
-        
-        B --> G
+    subgraph "Creator Browser"
+        A[Plain text or template fields] --> B[Generate 32-byte root secret]
+        B --> C[HKDF-SHA-256]
+        C --> D[AES-256-GCM encryption key]
+        C --> E[Read capability]
+        D --> F[Encrypt with fresh 96-bit IV]
+        F --> G[Ciphertext and IV]
+        B -.->|Never sent to server| H[URL fragment #root-secret]
     end
-    
-    subgraph "Server (Zero-Knowledge)"
-        F --> I[Receive Encrypted Data]
-        I --> J[Store in Redis/File]
-        J --> K[Generate Share ID]
-        K --> L[Return Share URL]
-        
-        subgraph "Storage"
-            M[(Redis/File System)]
-            N[Encrypted Content]
-            O[IV]
-            P[Metadata]
-            J --> M
-            M --> N
-            M --> O  
-            M --> P
-        end
+
+    subgraph "Zero-Knowledge Server"
+        G --> I[Create share]
+        E --> I
+        I --> J[Hash read capability]
+        I --> K[Generate delete capability and hash]
+        J --> L[(Redis or local file storage)]
+        K --> L
+        I --> M[Return share ID]
+        K --> Y[Return delete capability to creator]
     end
-    
+
     subgraph "Recipient Browser"
-        L --> Q[Access Share URL]
-        Q --> R[Extract Key from URL Fragment]
-        R --> S[Fetch Encrypted Data]
-        S --> T[Decrypt Client-Side]
-        T --> U[Display Plaintext]
-        
-        subgraph "Auto-Destruction"
-            V[View Count Check]
-            W[TTL Expiration]
-            X[Delete from Storage]
-            S --> V
-            V --> W
-            W --> X
-        end
+        M --> N[Open complete share URL]
+        H --> N
+        N --> O[Derive encryption key and read capability]
+        O --> P[Request encrypted share]
+        P --> Q[Verify read-capability hash]
+        Q --> R[Return ciphertext and IV]
+        R --> S[Decrypt locally]
+        S --> T[Render plain text or structured template]
     end
-    
-    subgraph "Security Features"
-        Y[AES-256-GCM]
-        Z[Zero-Knowledge]
-        AA[URL Fragment Keys]
-        BB[Auto-Expiration]
-        CC[View Limits]
-        DD[Optional Password]
+
+    subgraph "Lifecycle Controls"
+        U[TTL expiration]
+        V[View limits]
+        W[Creator revocation]
+        U --> X[Delete encrypted share]
+        V --> X
+        Y --> W
+        W --> X
     end
-    
-    style A fill:#e1f5fe
-    style B fill:#f3e5f5
-    style D fill:#f3e5f5
-    style G fill:#ffebee
-    style I fill:#e8f5e8
-    style M fill:#fff3e0
-    style R fill:#f3e5f5
-    style T fill:#f3e5f5
-    style X fill:#ffebee
 ```
 
 </details>
@@ -229,43 +206,70 @@ graph TB
 <details>
 <summary><strong>🔐 Encryption & Decryption Process</strong> (Click to expand)</summary>
 
-### 1) Key & IV Generation (Client-Side)
+### 1) Generate and derive share secrets in the browser
+
 ```js
-// AES-256 key
-const key = await crypto.subtle.generateKey({ name: "AES-GCM", length: 256 }, true, ["encrypt", "decrypt"]) 
-// 96-bit IV (12 bytes)
+const rootSecret = crypto.getRandomValues(new Uint8Array(32))
+const rootKey = await crypto.subtle.importKey(
+  "raw",
+  rootSecret,
+  "HKDF",
+  false,
+  ["deriveKey", "deriveBits"],
+)
+
+const encryptionKey = await crypto.subtle.deriveKey(
+  {
+    name: "HKDF",
+    hash: "SHA-256",
+    salt: new TextEncoder().encode("deleto:share:v1"),
+    info: new TextEncoder().encode("encryption"),
+  },
+  rootKey,
+  { name: "AES-GCM", length: 256 },
+  false,
+  ["encrypt", "decrypt"],
+)
+```
+
+The same root secret derives a separate 256-bit read capability with the HKDF info value `read-capability`. The root secret and encryption key never leave the browser.
+
+### 2) Encrypt the payload
+
+```js
 const iv = crypto.getRandomValues(new Uint8Array(12))
-```
-- Keys never leave the browser. Fresh IV per encryption. IV is not secret.
-
-### 2) Encrypt
-```js
-const encoder = new TextEncoder()
-const encrypted = await crypto.subtle.encrypt({ name: "AES-GCM", iv }, key, encoder.encode(plaintext))
-```
-- AES-256-GCM provides confidentiality + authentication (integrity).
-
-### 3) Encode for Transport
-```js
-const encryptedContent = btoa(String.fromCharCode(...new Uint8Array(encrypted)))
-const ivString = btoa(String.fromCharCode(...iv))
-```
-- Base64 makes binary safe for JSON/HTTP.
-
-### 4) Decrypt (Recipient Browser)
-```js
-// fragment contains the raw key material exported earlier (never sent to server)
-const keyBytes = /* decode from fragment */
-const importedKey = await crypto.subtle.importKey("raw", keyBytes, { name: "AES-GCM" }, true, ["decrypt"]) 
-
-// iv and encryptedContent come from server response
-const decrypted = await crypto.subtle.decrypt({ name: "AES-GCM", iv }, importedKey, encryptedBytes)
-const plaintext = new TextDecoder().decode(decrypted)
+const encrypted = await crypto.subtle.encrypt(
+  { name: "AES-GCM", iv },
+  encryptionKey,
+  new TextEncoder().encode(plaintext),
+)
 ```
 
-### Notes on encryptedContent and iv
-- `encryptedContent`: Base64 ciphertext, meaningless without the key.
-- `iv`: Base64 12-byte IV. Required for decryption; safe to store alongside ciphertext.
+AES-256-GCM provides authenticated encryption. Each recipient-specific share uses a fresh root secret, derived encryption key, and IV.
+
+### 3) Create the protected share
+
+The browser sends the ciphertext, IV, metadata, and derived read capability. The server hashes the capability before storage, generates a separate delete capability, and returns the share ID plus the creator-only delete capability.
+
+The complete URL has this form:
+
+```text
+https://dele.to/view/<share-id>#<root-secret>
+```
+
+Browsers do not include URL fragments in HTTP requests, so the root secret is not sent to the server.
+
+### 4) Access and decrypt in the recipient browser
+
+The recipient browser extracts and immediately removes the fragment, derives the same encryption key and read capability, and sends only the read capability when requesting the encrypted share. After the server verifies its hash, decryption happens locally.
+
+### Stored share data
+
+- `encryptedContent`: Base64 ciphertext, unusable without the derived encryption key.
+- `iv`: Base64 12-byte IV, safe to store alongside ciphertext.
+- `readCapabilityHash`: SHA-256 hash used to authorize metadata and content access.
+- `deleteCapabilityHash`: SHA-256 hash used to authorize creator revocation.
+- Expiration, view limits, password settings, title, and creation metadata.
 
 </details>
 
@@ -273,36 +277,37 @@ const plaintext = new TextDecoder().decode(decrypted)
 
 <details>
 <summary><strong>Data Flow Example</strong> (Click to expand)</summary>
-Let's trace what happens when you encrypt "my secret password":
+Consider a login template containing a service, username, and password.
 
-**Input:** `"my secret password"`
+**Step 1: Serialize the template locally**
 
-**Step 1: Key Generation**
-```
-🔑 AES-256 Key: [32 random bytes] 
-   Example: 4a7d1ed414474e4033ac29ccb8653d9b...
-```
-
-**Step 2: IV Generation**
-```
-🎲 IV (12 bytes): [random bytes]
-   Example: nb4WF+rLL5dokQnO (base64)
+```text
+[Login / Password]
+Service / Website: GitHub
+Username / Email: octocat@example.com
+Password: correct-horse-battery-staple
 ```
 
-**Step 3: Encryption**
-```
-📝 Plaintext: "my secret password"
-🔒 AES-256-GCM Encryption
-📦 Ciphertext: [encrypted bytes]
-   Example: uJN+TP0nsj2oFPRQOS7+tJIwZko= (base64)
+**Step 2: Generate one root secret and derive two independent values**
+
+```text
+root secret --HKDF(encryption)------> AES-256-GCM key
+            --HKDF(read-capability)-> read capability
 ```
 
-**Step 4: What Gets Sent to Server**
+**Step 3: Encrypt before transmission**
+
+```text
+plaintext + derived key + random IV -> authenticated ciphertext
+```
+
+**Step 4: Send only protected data to the server**
+
 ```json
 {
-  "encryptedContent": "uJN+TP0nsj2oFPRQOS7+tJIwZko=",
-  "iv": "nb4WF+rLL5dokQnO",
-  "title": "",
+  "encryptedContent": "<base64-ciphertext>",
+  "iv": "<base64-iv>",
+  "readCapability": "<derived-capability>",
   "expirationTime": "1h",
   "maxViews": 1,
   "requirePassword": false,
@@ -310,13 +315,21 @@ Let's trace what happens when you encrypt "my secret password":
 }
 ```
 
-**Step 5: Share URL Creation**
+The server stores SHA-256 hashes of the read and delete capabilities alongside the encrypted payload.
+
+**Step 5: Build the complete share URL**
+
+```text
+https://dele.to/view/abc123#<root-secret>
 ```
-🔗 URL: https://dele.to/view/abc123#[base64-encoded-key]
-                                      ↑
-                              This key NEVER goes to server
-```
- </details>
+
+Only the recipient's browser receives the root secret. The server receives a derived read capability when access is requested, verifies its hash, and returns the encrypted payload.
+
+**Step 6: Revoke when necessary**
+
+The creator can use the separately returned delete capability from the creation result to permanently remove the encrypted share before it expires.
+
+</details>
 
 
 
@@ -330,9 +343,11 @@ pnpm test
 # Generate coverage report
 pnpm test:coverage
 
-# Test specific encryption functions
-pnpm test -- --testPathPattern=crypto.test.ts
+# Test capability and encryption behavior
+pnpm test -- --runInBand __tests__/crypto.test.ts __tests__/share-simple.test.ts
 ```
+
+The capability tests cover HKDF derivation, hashed read/delete capabilities, unauthorized access, explicit revocation, and legacy-share compatibility.
 
 **📊 For detailed test status and coverage reports, see [TEST_STATUS.md](TEST_STATUS.md)**
 
@@ -340,7 +355,7 @@ pnpm test -- --testPathPattern=crypto.test.ts
 
 #### File Storage (Development Default)
 - **✅ No setup required** - works out of the box
-- **📁 Location**: `./secure-shares/` directory (auto-created)
+- **📁 Location**: `./.secure-shares/` directory (auto-created)
 - **🎯 Perfect for**: Development, testing, and local demos
 - **⚠️ Limitations**: Not suitable for production scaling or multiple servers
 
@@ -387,7 +402,7 @@ pnpm build
 - **Styling**: Tailwind CSS
 - **UI Components**: Radix UI + shadcn/ui
 - **Database**: Redis (Upstash) with file system fallback
-- **Encryption**: Web Crypto API (AES-256-GCM)
+- **Encryption**: Web Crypto API (HKDF-SHA-256 + AES-256-GCM)
 - **Icons**: Lucide React
 - **Fonts**: Geist Sans & Geist Mono
 
@@ -397,7 +412,7 @@ pnpm build
 <summary><strong>📁 Project Structure</strong> (Click to expand)</summary>
 
 ```
-secure-share-v2/
+dele-to/
 ├── __tests__/                 # Jest tests
 │   ├── crypto.test.ts
 │   └── share-simple.test.ts
@@ -411,6 +426,7 @@ secure-share-v2/
 │   ├── view/[id]/
 │   ├── vs/
 │   ├── globals.css
+│   ├── icon.png
 │   ├── layout.tsx
 │   ├── not-found.tsx
 │   └── page.tsx
@@ -424,6 +440,7 @@ secure-share-v2/
 │   ├── footer.tsx
 │   ├── inline-tip.tsx
 │   ├── password-input.tsx
+│   ├── secret-templates.tsx
 │   ├── security-tips.tsx
 │   └── theme-provider.tsx
 ├── hooks/
@@ -431,8 +448,9 @@ secure-share-v2/
 │   ├── use-mobile.tsx
 │   └── use-toast.ts
 ├── lib/                       # Utility libraries
-│   ├── crypto.ts              # Encryption utilities
+│   ├── crypto.ts              # HKDF and encryption utilities
 │   ├── farcaster.ts
+│   ├── share-storage.ts       # Redis and local storage primitives
 │   └── utils.ts
 ├── public/                    # Static assets
 │   ├── .well-known/

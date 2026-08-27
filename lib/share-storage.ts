@@ -20,6 +20,8 @@ export interface ShareData {
   currentViews: number
   requirePassword: boolean
   passwordHash?: string
+  readCapabilityHash?: string
+  deleteCapabilityHash?: string
   createdAt: string
 }
 
