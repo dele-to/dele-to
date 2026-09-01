@@ -1,6 +1,6 @@
 <p align="center">
   <a href="https://dele.to">
-    <img src="https://raw.githubusercontent.com/dele-to/cli/main/.github/dele-to-logo.png" width="100" height="100" alt="DELE.TO">
+    <img src=".github/dele-to-logo.png" width="100" alt="DELE.TO logo">
   </a>
 </p>
 
