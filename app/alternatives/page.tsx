@@ -25,10 +25,6 @@ const alternatives = [
     pricing: "Free",
     security: "Excellent",
     usability: "Excellent",
-    openSource: true,
-    selfHosted: true,
-    pros: ["True zero-knowledge architecture", "Multi-recipient sharing", "Modern, intuitive interface", "Optional password protection", "Mobile optimized"],
-    cons: ["File sharing coming soon"],
     bestFor: "Teams prioritizing privacy and user experience"
   },
   {
@@ -40,10 +36,6 @@ const alternatives = [
     pricing: "Free",
     security: "Excellent",
     usability: "Good",
-    openSource: true,
-    selfHosted: true,
-    pros: ["File sharing support", "Proven track record", "Active development", "Multiple deployment options"],
-    cons: ["Basic UI", "No password protection", "Limited mobile optimization"],
     bestFor: "Users needing file sharing with passwords"
   },
   {
@@ -55,10 +47,6 @@ const alternatives = [
     pricing: "Free / Paid",
     security: "Good",
     usability: "Good",
-    openSource: true,
-    selfHosted: true,
-    pros: ["Rich feature set", "API access", "File and URL sharing", "Good documentation"],
-    cons: ["Server-side encryption", "Not zero-knowledge", "Complex interface"],
     bestFor: "Organizations needing API integration and file sharing"
   },
   {
@@ -70,10 +58,6 @@ const alternatives = [
     pricing: "Free",
     security: "Excellent",
     usability: "Good",
-    openSource: true,
-    selfHosted: true,
-    pros: ["Zero-knowledge architecture", "Syntax highlighting", "File sharing", "Discussion features"],
-    cons: ["Basic UI", "Developer-focused", "Limited mobile optimization"],
     bestFor: "Developers sharing code snippets and files"
   },
   {
@@ -85,10 +69,6 @@ const alternatives = [
     pricing: "Free / Paid",
     security: "Good",
     usability: "Good",
-    openSource: true,
-    selfHosted: true,
-    pros: ["API access", "Custom domains", "Compliance features", "Enterprise support"],
-    cons: ["Server-side encryption", "Not zero-knowledge", "Paid features"],
     bestFor: "Enterprises needing API integration and compliance"
   }
 ]
