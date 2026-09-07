@@ -14,7 +14,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Badge } from "@/components/ui/badge"
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import { Copy, Check, Shield, ArrowLeft, Key, RefreshCw, AlertTriangle, Link2, QrCode, Plus, Trash2, Users, User, X, Tag, ChevronDown, Settings, Crown, Lock, Info } from "lucide-react"
+import { Copy, Check, Shield, ArrowLeft, Key, RefreshCw, AlertTriangle, Link2, QrCode, Plus, Trash2, Users, User, Tag, ChevronDown, Settings, Lock, Info } from "lucide-react"
 import Link from "next/link"
 import { createSecureShare, deleteSecureShare } from "../actions/share"
 import { SecureCrypto } from "../../lib/crypto"
@@ -75,7 +75,6 @@ export default function CreatePage() {
   const [qrModalTitle, setQrModalTitle] = useState("")
   const [isClient, setIsClient] = useState(false)
   const [error, setError] = useState("")
-  const [tags, setTags] = useState(["NEW"])
   const [isAdvancedSettingsOpen, setIsAdvancedSettingsOpen] = useState(false)
   const [isTitleOpen, setIsTitleOpen] = useState(false)
   const [templateId, setTemplateId] = useState<TemplateId>("plain")
@@ -329,15 +328,6 @@ export default function CreatePage() {
     setQrModalLink(link)
     setQrModalTitle(title)
     setIsQrModalOpen(true)
-  }
-
-  const addTag = (tag: string) => {
-    if (tags.length >= 3) return
-    setTags([...tags, tag])
-  }
-
-  const removeTag = (tag: string) => {
-    setTags(tags.filter(t => t !== tag))
   }
 
   if (generatedLinks.length > 0) {
