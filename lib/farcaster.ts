@@ -5,24 +5,6 @@ import { sdk } from '@farcaster/miniapp-sdk'
 export class FarcasterMiniApp {
     private static initialized = false
 
-    static async initialize() {
-        if (this.initialized) return
-
-        try {
-            // Check if we're in a browser environment
-            if (typeof window === 'undefined') {
-                return
-            }
-
-            // Always call ready() - it will work in Farcaster and be ignored elsewhere
-            await sdk.actions.ready()
-            this.initialized = true
-        } catch (error: unknown) {
-            console.error('Failed to initialize Farcaster MiniApp SDK:', error)
-            // Don't throw - app should work even if Farcaster SDK fails
-        }
-    }
-
     static isInFarcaster(): boolean {
         if (typeof window === 'undefined') return false
 
