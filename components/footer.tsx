@@ -95,16 +95,6 @@ export function Footer() {
                                     GitHub Repo
                                 </a>
                             </li>
-                            {/* <li>
-                                <Link href="/privacy" className="hover:text-foreground transition-colors">
-                                    Privacy Policy
-                                </Link>
-                            </li>
-                            <li>
-                                <Link href="/terms" className="hover:text-foreground transition-colors">
-                                    Terms of Service
-                                </Link>
-                            </li> */}
                         </ul>
                     </div>
                 </div>
